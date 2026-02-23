@@ -109,7 +109,7 @@ Odgovori STRIKTNO u JSON formatu, bez dodatnog teksta, sa sledećom strukturom:
 
       // Call Claude API with vision
       const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-sonnet-4-6',
         max_tokens: 4096,
         messages: [
           {
@@ -145,7 +145,7 @@ Odgovori STRIKTNO u JSON formatu, bez dodatnog teksta, sa sledećom strukturom:
 
       // Add metadata
       analysis.analyzedAt = new Date().toISOString();
-      analysis.modelUsed = 'claude-sonnet-4-5-20250929';
+      analysis.modelUsed = 'claude-sonnet-4-6';
       analysis.confidence = analysis.faceShapeConfidence || 85;
 
       return analysis;
@@ -214,7 +214,7 @@ Daj praktične, personalizirane savjete u JSON formatu:
 }`;
 
       const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-sonnet-4-6',
         max_tokens: 2048,
         messages: [
           {
@@ -264,7 +264,7 @@ Daj odgovor u JSON formatu sa sledećim poljima:
 }`;
 
       const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-sonnet-4-6',
         max_tokens: 1536,
         messages: [
           {
