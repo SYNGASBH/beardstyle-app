@@ -4,10 +4,12 @@ node_modules/
 
 # Environment files - NEVER COMMIT THESE
 .env
+.env.*
 .env.local
 .env.*.local
 backend/.env
 frontend/.env
+!-.env.example
 
 # Build outputs
 build/
