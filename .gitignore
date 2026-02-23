@@ -75,3 +75,5 @@ secrets/
 *.sql.backup
 *.dump
 nul
+.claude/settings.local.json
+.claude/settings.local.json
