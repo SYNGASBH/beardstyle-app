@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://beard-style-app.local/schemas/beard-style.json",
+  "title": "BeardStyle",
+  "description": "Schema for beard style catalog entries",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "family", "length_class", "rules", "ui"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "URL-friendly unique identifier",
+      "examples": ["full-beard", "garibaldi", "goatee"]
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name for UI"
+    },
+    "family": {
+      "type": "string",
+      "enum": [
+        "full_beard",
+        "garibaldi",
+        "goatee_family",
+        "mutton_chops_family",
+        "chin_strap_family",
+        "clean_shaven",
+        "stubble"
+      ],
+      "description": "Style family for grouping and ML classification"
+    },
+    "length_class": {
+      "type": "string",
+      "enum": [
+        "none",
+        "stubble_2_3mm",
+        "short_10_15mm",
+        "medium_20_35mm",
+        "long_50_80mm",
+        "very_long_gt_80mm"
+      ],
+      "description": "Beard length classification"
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["must", "must_not", "notes"],
+      "properties": {
+        "must": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Required characteristics for this style"
+        },
+        "must_not": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Characteristics that disqualify this style"
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Additional context and tips"
+        }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tags", "filters"],
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Searchable tags for UI"
+        },
+        "filters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["coverage", "cheeks", "neckline", "bottom_shape", "maintenance"],
+          "properties": {
+            "coverage": {
+              "type": "string",
+              "enum": ["none", "chin_only", "chin_mustache", "full_lower_face"]
+            },
+            "cheeks": {
+              "type": "string",
+              "enum": ["clean", "partial", "covered"]
+            },
+            "neckline": {
+              "type": "string",
+              "enum": ["none", "soft", "defined"]
+            },
+            "bottom_shape": {
+              "type": "string",
+              "enum": ["none", "u_trimmed", "rounded_natural", "pointed"]
+            },
+            "maintenance": {
+              "type": "string",
+              "enum": ["low", "medium", "high"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

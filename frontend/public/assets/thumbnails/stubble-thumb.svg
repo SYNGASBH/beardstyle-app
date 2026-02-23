@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260" fill="none">
+  <defs>
+    <linearGradient id="skinGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f5d6c6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e8c4b0;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+    </filter>
+    <pattern id="stubblePattern" width="4" height="4" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="0.8" fill="#4a3728" opacity="0.7"/>
+    </pattern>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="100" cy="115" r="95" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+
+  <!-- Neck -->
+  <path d="M 70 155 L 70 200 Q 100 210 130 200 L 130 155" fill="url(#skinGradient)"/>
+
+  <!-- Face shape -->
+  <ellipse cx="100" cy="95" rx="55" ry="65" fill="url(#skinGradient)" filter="url(#shadow)"/>
+
+  <!-- Ears -->
+  <ellipse cx="45" cy="95" rx="8" ry="15" fill="#e8c4b0" stroke="#d4a088" stroke-width="1"/>
+  <ellipse cx="155" cy="95" rx="8" ry="15" fill="#e8c4b0" stroke="#d4a088" stroke-width="1"/>
+
+  <!-- Stubble area with pattern -->
+  <path d="M 55 90
+           C 50 100, 48 115, 50 135
+           C 52 150, 60 160, 75 165
+           Q 100 172, 125 165
+           C 140 160, 148 150, 150 135
+           C 152 115, 150 100, 145 90
+           C 140 85, 130 82, 115 80
+           L 85 80
+           C 70 82, 60 85, 55 90 Z"
+        fill="url(#stubblePattern)" opacity="0.8"/>
+
+  <!-- Stubble dots - random distribution -->
+  <g fill="#4a3728" opacity="0.6">
+    <circle cx="60" cy="100" r="1"/>
+    <circle cx="65" cy="108" r="0.8"/>
+    <circle cx="58" cy="115" r="1"/>
+    <circle cx="63" cy="122" r="0.8"/>
+    <circle cx="55" cy="128" r="1"/>
+    <circle cx="62" cy="135" r="0.8"/>
+    <circle cx="70" cy="95" r="1"/>
+    <circle cx="75" cy="105" r="0.8"/>
+    <circle cx="72" cy="118" r="1"/>
+    <circle cx="78" cy="130" r="0.8"/>
+    <circle cx="68" cy="142" r="1"/>
+    <circle cx="75" cy="150" r="0.8"/>
+    <circle cx="85" cy="98" r="1"/>
+    <circle cx="90" cy="110" r="0.8"/>
+    <circle cx="88" cy="125" r="1"/>
+    <circle cx="92" cy="138" r="0.8"/>
+    <circle cx="85" cy="155" r="1"/>
+    <circle cx="95" cy="160" r="0.8"/>
+    <circle cx="100" cy="100" r="1"/>
+    <circle cx="100" cy="115" r="0.8"/>
+    <circle cx="100" cy="130" r="1"/>
+    <circle cx="100" cy="145" r="0.8"/>
+    <circle cx="100" cy="162" r="1"/>
+    <circle cx="115" cy="98" r="1"/>
+    <circle cx="110" cy="110" r="0.8"/>
+    <circle cx="112" cy="125" r="1"/>
+    <circle cx="108" cy="138" r="0.8"/>
+    <circle cx="115" cy="155" r="1"/>
+    <circle cx="105" cy="160" r="0.8"/>
+    <circle cx="130" cy="95" r="1"/>
+    <circle cx="125" cy="105" r="0.8"/>
+    <circle cx="128" cy="118" r="1"/>
+    <circle cx="122" cy="130" r="0.8"/>
+    <circle cx="132" cy="142" r="1"/>
+    <circle cx="125" cy="150" r="0.8"/>
+    <circle cx="140" cy="100" r="1"/>
+    <circle cx="135" cy="108" r="0.8"/>
+    <circle cx="142" cy="115" r="1"/>
+    <circle cx="137" cy="122" r="0.8"/>
+    <circle cx="145" cy="128" r="1"/>
+    <circle cx="138" cy="135" r="0.8"/>
+  </g>
+
+  <!-- Light mustache stubble -->
+  <g fill="#4a3728" opacity="0.5">
+    <circle cx="75" cy="87" r="0.8"/>
+    <circle cx="82" cy="85" r="0.8"/>
+    <circle cx="90" cy="84" r="0.8"/>
+    <circle cx="100" cy="83" r="0.8"/>
+    <circle cx="110" cy="84" r="0.8"/>
+    <circle cx="118" cy="85" r="0.8"/>
+    <circle cx="125" cy="87" r="0.8"/>
+  </g>
+
+  <!-- Eyes -->
+  <ellipse cx="78" cy="65" rx="10" ry="6" fill="white"/>
+  <ellipse cx="122" cy="65" rx="10" ry="6" fill="white"/>
+  <circle cx="78" cy="65" r="4" fill="#4a3728"/>
+  <circle cx="122" cy="65" r="4" fill="#4a3728"/>
+  <circle cx="79" cy="64" r="1.5" fill="white"/>
+  <circle cx="123" cy="64" r="1.5" fill="white"/>
+
+  <!-- Eyebrows -->
+  <path d="M 65 55 Q 78 50 90 55" stroke="#3d2817" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M 110 55 Q 122 50 135 55" stroke="#3d2817" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- Nose -->
+  <path d="M 100 70 L 100 90 Q 95 95 100 97 Q 105 95 100 90" stroke="#d4a088" stroke-width="2" fill="none"/>
+
+  <!-- Mouth hint -->
+  <path d="M 88 105 Q 100 110 112 105" stroke="#c9a090" stroke-width="1.5" fill="none"/>
+
+  <!-- Hair -->
+  <path d="M 50 55 Q 50 25 100 20 Q 150 25 150 55 L 145 65 Q 100 50 55 65 Z" fill="#3d2817"/>
+  <path d="M 55 50 Q 75 40 100 38 Q 125 40 145 50" stroke="#5c4033" stroke-width="1" fill="none" opacity="0.5"/>
+
+  <!-- Label -->
+  <text x="100" y="245" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#1e293b" font-weight="600">3-Day Stubble</text>
+</svg>

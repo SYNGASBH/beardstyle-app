@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Lower face outline -->
+  <path d="M100,50 Q100,50 120,48 Q200,40 280,48 Q300,50 300,50" opacity="0.3"/>
+
+  <!-- Nose bottom -->
+  <path d="M185,55 Q200,65 215,55" stroke-width="1"/>
+
+  <!-- Lips -->
+  <path d="M165,110 Q182,100 200,105 Q218,100 235,110" stroke-width="1.2"/>
+  <path d="M165,110 Q182,120 200,115 Q218,120 235,110" stroke-width="1"/>
+
+  <!-- Jawline -->
+  <path d="M100,50 Q90,120 95,180 Q100,220 130,260 Q160,290 200,300 Q240,290 270,260 Q300,220 305,180 Q310,120 300,50" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Chin -->
+  <path d="M170,280 Q200,300 230,280" stroke-width="1" opacity="0.3"/>
+
+  <!-- Handlebar mustache - left side -->
+  <path d="M200,95 Q180,88 160,90 Q140,92 120,85 Q105,78 95,65" stroke-width="2.5" fill="none"/>
+  <path d="M200,100 Q180,95 160,97 Q140,100 125,95 Q110,88 100,75" stroke-width="2" fill="none"/>
+  <path d="M200,105 Q185,100 170,102 Q155,105 140,100 Q125,93 115,82" stroke-width="1.5" fill="none"/>
+
+  <!-- Handlebar mustache - right side (mirror) -->
+  <path d="M200,95 Q220,88 240,90 Q260,92 280,85 Q295,78 305,65" stroke-width="2.5" fill="none"/>
+  <path d="M200,100 Q220,95 240,97 Q260,100 275,95 Q290,88 300,75" stroke-width="2" fill="none"/>
+  <path d="M200,105 Q215,100 230,102 Q245,105 260,100 Q275,93 285,82" stroke-width="1.5" fill="none"/>
+
+  <!-- Curved tips - left -->
+  <path d="M95,65 Q90,55 92,48" stroke-width="2" fill="none"/>
+
+  <!-- Curved tips - right -->
+  <path d="M305,65 Q310,55 308,48" stroke-width="2" fill="none"/>
+
+  <!-- Short beard below - stippling effect -->
+  <g opacity="0.4" stroke-width="0.8">
+    <!-- Beard texture rows -->
+    <path d="M140,130 Q145,135 150,130 Q155,135 160,130"/>
+    <path d="M170,135 Q175,140 180,135 Q185,140 190,135"/>
+    <path d="M200,135 Q205,140 210,135 Q215,140 220,135"/>
+    <path d="M230,130 Q235,135 240,130 Q245,135 250,130"/>
+
+    <path d="M135,150 Q140,155 145,150 Q150,155 155,150"/>
+    <path d="M165,155 Q170,160 175,155 Q180,160 185,155"/>
+    <path d="M195,155 Q200,160 205,155 Q210,160 215,155"/>
+    <path d="M225,155 Q230,160 235,155 Q240,160 245,155"/>
+
+    <path d="M140,170 Q145,175 150,170 Q155,175 160,170"/>
+    <path d="M170,175 Q175,180 180,175 Q185,180 190,175"/>
+    <path d="M200,175 Q205,180 210,175 Q215,180 220,175"/>
+    <path d="M230,170 Q235,175 240,170 Q245,175 250,170"/>
+
+    <path d="M145,190 Q150,195 155,190 Q160,195 165,190"/>
+    <path d="M175,195 Q180,200 185,195 Q190,200 195,195"/>
+    <path d="M205,195 Q210,200 215,195 Q220,200 225,195"/>
+    <path d="M235,190 Q240,195 245,190 Q250,195 255,190"/>
+
+    <!-- Lower beard -->
+    <path d="M155,210 Q160,215 165,210 Q170,215 175,210"/>
+    <path d="M185,215 Q190,220 195,215 Q200,220 205,215"/>
+    <path d="M215,210 Q220,215 225,210 Q230,215 235,210"/>
+
+    <path d="M165,230 Q170,235 175,230 Q180,235 185,230"/>
+    <path d="M195,230 Q200,235 205,230 Q210,235 215,230"/>
+  </g>
+
+  <!-- Neckline -->
+  <path d="M130,260 Q165,275 200,278 Q235,275 270,260" stroke-width="0.8" opacity="0.3" stroke-dasharray="3,3"/>
+</svg>

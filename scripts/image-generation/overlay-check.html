@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beard Sketch Alignment Checker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        select, input[type="range"] {
+            padding: 8px;
+            border: 1px solid #444;
+            background: #333;
+            color: #fff;
+            border-radius: 4px;
+            min-width: 150px;
+        }
+
+        input[type="range"] {
+            cursor: pointer;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .preview-box {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .preview-box h3 {
+            margin-bottom: 10px;
+            font-weight: 400;
+            color: #888;
+        }
+
+        .overlay-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            background: #fff;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .overlay-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .overlay-container img.base {
+            opacity: 1;
+        }
+
+        .overlay-container img.overlay {
+            mix-blend-mode: difference;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .grid-overlay.horizontal {
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 39px,
+                #ff0000 39px,
+                #ff0000 40px
+            );
+        }
+
+        .grid-overlay.vertical {
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 39px,
+                #ff0000 39px,
+                #ff0000 40px
+            );
+        }
+
+        .center-line {
+            position: absolute;
+            background: #00ff00;
+            opacity: 0.5;
+        }
+
+        .center-line.horizontal {
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            transform: translateY(-50%);
+        }
+
+        .center-line.vertical {
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            transform: translateX(-50%);
+        }
+
+        .jawline-guide {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #ff00ff;
+            opacity: 0.7;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .status.pass {
+            background: #1a4a1a;
+            color: #4ade80;
+        }
+
+        .status.fail {
+            background: #4a1a1a;
+            color: #f87171;
+        }
+
+        .instructions {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .instructions h4 {
+            margin-bottom: 10px;
+            color: #4A90D9;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+        }
+
+        .file-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            display: none;
+        }
+
+        .file-btn {
+            padding: 8px 16px;
+            background: #4A90D9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .file-btn:hover {
+            background: #3a7bc8;
+        }
+
+        .measurement {
+            font-family: monospace;
+            font-size: 14px;
+            margin-top: 10px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>Beard Sketch Alignment Checker</h1>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>Base Image</label>
+            <div class="file-input-wrapper">
+                <button class="file-btn" onclick="document.getElementById('baseFile').click()">Choose Base</button>
+                <input type="file" id="baseFile" accept="image/*" onchange="loadImage(this, 'base')">
+                <span id="baseName">No file</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Overlay Image</label>
+            <div class="file-input-wrapper">
+                <button class="file-btn" onclick="document.getElementById('overlayFile').click()">Choose Overlay</button>
+                <input type="file" id="overlayFile" accept="image/*" onchange="loadImage(this, 'overlay')">
+                <span id="overlayName">No file</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Overlay Opacity</label>
+            <input type="range" id="opacitySlider" min="0" max="100" value="50" oninput="updateOpacity(this.value)">
+        </div>
+
+        <div class="control-group">
+            <label>Jawline Guide (px)</label>
+            <input type="range" id="jawlineSlider" min="0" max="400" value="280" oninput="updateJawline(this.value)">
+        </div>
+
+        <div class="control-group">
+            <label>Show Grid</label>
+            <select id="gridSelect" onchange="updateGrid(this.value)">
+                <option value="none">None</option>
+                <option value="horizontal">Horizontal</option>
+                <option value="vertical">Vertical</option>
+                <option value="both">Both</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="canvas-container">
+        <div class="preview-box">
+            <h3>Overlay Comparison</h3>
+            <div class="overlay-container" id="overlayContainer">
+                <img id="baseImg" class="base" src="" alt="Base image">
+                <img id="overlayImg" class="overlay" src="" alt="Overlay image">
+                <div class="grid-overlay horizontal" id="gridH" style="display: none;"></div>
+                <div class="grid-overlay vertical" id="gridV" style="display: none;"></div>
+                <div class="center-line horizontal"></div>
+                <div class="center-line vertical"></div>
+                <div class="jawline-guide" id="jawlineGuide" style="top: 280px;"></div>
+            </div>
+            <div class="measurement" id="measurement">Jawline position: 280px from top</div>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h4>How to Use</h4>
+        <ul>
+            <li>Load two processed images to compare alignment</li>
+            <li>Use <strong>Difference</strong> blend mode - identical pixels appear black</li>
+            <li>Adjust jawline guide to match the jawline position</li>
+            <li>Check that jawline is within <strong>±2px</strong> across all images</li>
+            <li>White/colored areas show misalignment</li>
+        </ul>
+        <h4>Checkpoints</h4>
+        <ul>
+            <li>Nose position at top edge - should be identical</li>
+            <li>Jawline position - measure from top</li>
+            <li>Left/right symmetry - use vertical center line</li>
+            <li>Overall composition - should only differ in beard area</li>
+        </ul>
+    </div>
+
+    <script>
+        function loadImage(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById(type + 'Img');
+                img.src = e.target.result;
+                document.getElementById(type + 'Name').textContent = file.name;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateOpacity(value) {
+            const overlay = document.getElementById('overlayImg');
+            overlay.style.opacity = value / 100;
+        }
+
+        function updateJawline(value) {
+            const guide = document.getElementById('jawlineGuide');
+            guide.style.top = value + 'px';
+            document.getElementById('measurement').textContent =
+                'Jawline position: ' + value + 'px from top';
+        }
+
+        function updateGrid(value) {
+            const gridH = document.getElementById('gridH');
+            const gridV = document.getElementById('gridV');
+
+            gridH.style.display = (value === 'horizontal' || value === 'both') ? 'block' : 'none';
+            gridV.style.display = (value === 'vertical' || value === 'both') ? 'block' : 'none';
+        }
+
+        // Drag and drop support
+        const container = document.getElementById('overlayContainer');
+
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            container.style.outline = '2px dashed #4A90D9';
+        });
+
+        container.addEventListener('dragleave', () => {
+            container.style.outline = 'none';
+        });
+
+        container.addEventListener('drop', (e) => {
+            e.preventDefault();
+            container.style.outline = 'none';
+
+            const files = e.dataTransfer.files;
+            if (files.length >= 1) {
+                const reader1 = new FileReader();
+                reader1.onload = (ev) => {
+                    document.getElementById('baseImg').src = ev.target.result;
+                    document.getElementById('baseName').textContent = files[0].name;
+                };
+                reader1.readAsDataURL(files[0]);
+            }
+            if (files.length >= 2) {
+                const reader2 = new FileReader();
+                reader2.onload = (ev) => {
+                    document.getElementById('overlayImg').src = ev.target.result;
+                    document.getElementById('overlayName').textContent = files[1].name;
+                };
+                reader2.readAsDataURL(files[1]);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,475 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "created": "2026-02-05",
+    "total_styles": 15,
+    "image_dimensions": "800x800",
+    "thumbnail_dimensions": "400x400",
+    "format": "webp",
+    "quality": 85
+  },
+
+  "locked_prompt": "Create an extreme close-up technical illustration, showing ONLY the lower third of face from bottom of nose to neck, NO eyes visible, NO forehead, NO upper face, crop tightly to show: mustache area, chin, jawline, and neckline only, camera angle: perfectly frontal, orthographic-like view, no perspective distortion, no tilt, no rotation, symmetrical left and right jaw alignment, only the lower nostrils barely visible at top edge, nostrils cropped identically across all images, professional graphite pencil sketch style with precise clean linework, subtle crosshatch shading to show volume and texture, isolated on pure white background (#FFFFFF), blueprint technical drawing aesthetic, neutral grayscale only - no color, no skin tones, non-artistic technical reference illustration, barber reference diagram style, high detail on beard hair texture, composition: lower face only as if cutting portrait below nose",
+
+  "negative_prompt": "full face, complete person, eyes visible, forehead showing, portrait, headshot, photorealistic skin, color photography, upper face, nose detail, hair on head, ears prominent, artistic portrait, character art, emotional expression, wide shot, full head visible, celebrity likeness, color, skin color, ethnic features, background elements, cartoon, anime, artistic interpretation, watercolor, oil painting, low quality, blurry, text, watermark, signature, tilted angle, rotated view, 3D perspective, asymmetrical composition",
+
+  "styles": [
+    {
+      "id": "full-beard",
+      "name": "Full Beard",
+      "name_bs": "Puna Brada",
+      "slug": "full-beard",
+      "test_priority": 1,
+      "prompt_block_3": "8-12cm length beard with natural rounded shape and dense even coverage, connected mustache flowing seamlessly into beard, covers entire chin and jawline with impressive volume, high detail on beard hair texture showing fullness",
+      "characteristics": {
+        "coverage": "full",
+        "density": "dense",
+        "mustache_connection": "connected",
+        "shape": "rounded",
+        "length_cm": "8-12"
+      },
+      "maintenance": {
+        "level": "medium",
+        "trimming_frequency": "weekly",
+        "daily_minutes": 5,
+        "tools": ["beard trimmer", "scissors", "beard oil", "brush"]
+      },
+      "growth_weeks": 8,
+      "face_shapes_ideal": ["round", "oval", "square"],
+      "face_shapes_avoid": [],
+      "tags": ["classic", "masculine", "versatile", "professional"],
+      "difficulty": "medium",
+      "popularity_rank": 1
+    },
+    {
+      "id": "stubble-3day",
+      "name": "3-Day Stubble",
+      "name_bs": "Trodnevna Strniška",
+      "slug": "stubble-3day",
+      "test_priority": 2,
+      "prompt_block_3": "very short facial hair 2-3mm creating subtle shadow effect, light stippling/dotwork texture technique to show short stubble, skin texture visible through short hair, defined jawline clearly showing, focus on showing even stubble distribution and length",
+      "characteristics": {
+        "coverage": "full",
+        "density": "light",
+        "mustache_connection": "connected",
+        "shape": "natural",
+        "length_mm": "2-3"
+      },
+      "maintenance": {
+        "level": "low",
+        "trimming_frequency": "every 2-3 days",
+        "daily_minutes": 2,
+        "tools": ["stubble trimmer", "electric shaver"]
+      },
+      "growth_weeks": 0.5,
+      "face_shapes_ideal": ["oval", "square", "diamond", "heart"],
+      "face_shapes_avoid": [],
+      "tags": ["low-maintenance", "modern", "casual", "rugged"],
+      "difficulty": "easy",
+      "popularity_rank": 2
+    },
+    {
+      "id": "van-dyke",
+      "name": "Van Dyke",
+      "name_bs": "Van Dyke",
+      "slug": "van-dyke",
+      "test_priority": 3,
+      "prompt_block_3": "pointed chin beard DISCONNECTED from styled upward-curved mustache, clear visible gap between mustache and chin beard - IMPORTANT separation, elegant refined pointed shape on chin only, clean shaven cheeks and upper lip sides visible, emphasis on showing the disconnection and gap clearly",
+      "characteristics": {
+        "coverage": "partial",
+        "density": "medium",
+        "mustache_connection": "disconnected",
+        "shape": "pointed",
+        "length_cm": "2-5"
+      },
+      "maintenance": {
+        "level": "high",
+        "trimming_frequency": "every 3-4 days",
+        "daily_minutes": 8,
+        "tools": ["precision trimmer", "razor", "mustache wax", "scissors"]
+      },
+      "growth_weeks": 4,
+      "face_shapes_ideal": ["round", "square", "diamond"],
+      "face_shapes_avoid": ["oblong"],
+      "tags": ["artistic", "distinguished", "vintage", "sophisticated"],
+      "difficulty": "hard",
+      "popularity_rank": 8
+    },
+    {
+      "id": "clean-shaven",
+      "name": "Clean Shaven",
+      "name_bs": "Glatko Obrijano",
+      "slug": "clean-shaven",
+      "test_priority": null,
+      "prompt_block_3": "completely smooth skin with no facial hair at all, clear defined jawline contour showing bone structure, emphasis on showing smooth clean skin and jaw shape",
+      "characteristics": {
+        "coverage": "none",
+        "density": "none",
+        "mustache_connection": "none",
+        "shape": "none",
+        "length_mm": "0"
+      },
+      "maintenance": {
+        "level": "medium",
+        "trimming_frequency": "daily",
+        "daily_minutes": 10,
+        "tools": ["razor", "shaving cream", "aftershave"]
+      },
+      "growth_weeks": 0,
+      "face_shapes_ideal": ["oval", "diamond"],
+      "face_shapes_avoid": ["round"],
+      "tags": ["clean", "professional", "corporate", "classic"],
+      "difficulty": "easy",
+      "popularity_rank": 3
+    },
+    {
+      "id": "short-boxed-beard",
+      "name": "Short Boxed Beard",
+      "name_bs": "Kratka Geometrijska Brada",
+      "slug": "short-boxed-beard",
+      "test_priority": null,
+      "prompt_block_3": "precisely trimmed 5-8mm length with sharp geometric edges, clean defined cheek line and neckline creating squared-off shape, neat professional appearance with visible precision trimming, emphasis on sharp edges and geometric precision",
+      "characteristics": {
+        "coverage": "full",
+        "density": "medium",
+        "mustache_connection": "connected",
+        "shape": "geometric/squared",
+        "length_mm": "5-8"
+      },
+      "maintenance": {
+        "level": "medium",
+        "trimming_frequency": "every 3-4 days",
+        "daily_minutes": 5,
+        "tools": ["beard trimmer", "precision trimmer", "razor"]
+      },
+      "growth_weeks": 2,
+      "face_shapes_ideal": ["oval", "round", "heart"],
+      "face_shapes_avoid": ["square"],
+      "tags": ["professional", "corporate", "neat", "modern"],
+      "difficulty": "medium",
+      "popularity_rank": 4
+    },
+    {
+      "id": "corporate-beard",
+      "name": "Corporate Beard",
+      "name_bs": "Korporativna Brada",
+      "slug": "corporate-beard",
+      "test_priority": null,
+      "prompt_block_3": "medium length 1-2cm with well-maintained neat appearance, balanced proportions with subtle taper at cheek areas, professional groomed look with even density throughout, emphasis on professional neat grooming and balance",
+      "characteristics": {
+        "coverage": "full",
+        "density": "medium-dense",
+        "mustache_connection": "connected",
+        "shape": "natural/tapered",
+        "length_cm": "1-2"
+      },
+      "maintenance": {
+        "level": "medium",
+        "trimming_frequency": "weekly",
+        "daily_minutes": 5,
+        "tools": ["beard trimmer", "scissors", "beard oil", "comb"]
+      },
+      "growth_weeks": 3,
+      "face_shapes_ideal": ["oval", "oblong", "diamond"],
+      "face_shapes_avoid": [],
+      "tags": ["professional", "business", "elegant", "versatile"],
+      "difficulty": "medium",
+      "popularity_rank": 5
+    },
+    {
+      "id": "goatee",
+      "name": "Goatee",
+      "name_bs": "Kozja Bradica",
+      "slug": "goatee",
+      "test_priority": null,
+      "prompt_block_3": "chin beard connected to mustache forming continuous goatee, clean shaven cheeks with clear visible contrast, rounded or pointed bottom shape on chin area only, emphasis on showing clean cheek separation and goatee shape",
+      "characteristics": {
+        "coverage": "partial",
+        "density": "medium",
+        "mustache_connection": "connected",
+        "shape": "rounded/pointed",
+        "length_cm": "1-3"
+      },
+      "maintenance": {
+        "level": "medium",
+        "trimming_frequency": "every 3-4 days",
+        "daily_minutes": 5,
+        "tools": ["precision trimmer", "razor", "scissors"]
+      },
+      "growth_weeks": 3,
+      "face_shapes_ideal": ["round", "square", "oval"],
+      "face_shapes_avoid": ["oblong"],
+      "tags": ["classic", "versatile", "defined", "stylish"],
+      "difficulty": "medium",
+      "popularity_rank": 6
+    },
+    {
+      "id": "balbo",
+      "name": "Balbo",
+      "name_bs": "Balbo",
+      "slug": "balbo",
+      "test_priority": null,
+      "prompt_block_3": "disconnected mustache and chin beard with NO sideburns, floating chin beard with soul patch, styled mustache above, clear gap visible between mustache and chin beard, clean shaven cheeks and jaw sides showing separation, emphasis on showing disconnected elements and gaps clearly",
+      "characteristics": {
+        "coverage": "partial",
+        "density": "medium",
+        "mustache_connection": "disconnected",
+        "shape": "structured",
+        "length_cm": "1-3"
+      },
+      "maintenance": {
+        "level": "high",
+        "trimming_frequency": "every 2-3 days",
+        "daily_minutes": 10,
+        "tools": ["precision trimmer", "razor", "scissors", "mustache wax"]
+      },
+      "growth_weeks": 4,
+      "face_shapes_ideal": ["round", "oval", "heart"],
+      "face_shapes_avoid": ["oblong"],
+      "tags": ["sophisticated", "stylish", "unique", "celebrity"],
+      "difficulty": "hard",
+      "popularity_rank": 10
+    },
+    {
+      "id": "circle-beard",
+      "name": "Circle Beard",
+      "name_bs": "Kružna Brada",
+      "slug": "circle-beard",
+      "test_priority": null,
+      "prompt_block_3": "rounded goatee connecting mustache and chin in perfect circular shape, clean shaven cheeks with smooth rounded contour, symmetrical circular appearance around mouth area, emphasis on perfect circular shape and symmetry",
+      "characteristics": {
+        "coverage": "partial",
+        "density": "medium",
+        "mustache_connection": "connected",
+        "shape": "circular",
+        "length_cm": "1-2"
+      },
+      "maintenance": {
+        "level": "medium",
+        "trimming_frequency": "every 3-4 days",
+        "daily_minutes": 6,
+        "tools": ["precision trimmer", "razor", "scissors"]
+      },
+      "growth_weeks": 3,
+      "face_shapes_ideal": ["square", "diamond", "heart"],
+      "face_shapes_avoid": ["round"],
+      "tags": ["neat", "defined", "symmetrical", "classic"],
+      "difficulty": "medium",
+      "popularity_rank": 9
+    },
+    {
+      "id": "ducktail",
+      "name": "Ducktail",
+      "name_bs": "Pačiji Rep",
+      "slug": "ducktail",
+      "test_priority": null,
+      "prompt_block_3": "full beard with pointed bottom resembling duck tail shape, longer at chin tapering to distinctive point, full coverage on sides with triangular bottom shape, dense texture throughout with emphasis on pointed tip",
+      "characteristics": {
+        "coverage": "full",
+        "density": "dense",
+        "mustache_connection": "connected",
+        "shape": "pointed/tapered",
+        "length_cm": "5-10"
+      },
+      "maintenance": {
+        "level": "medium",
+        "trimming_frequency": "weekly",
+        "daily_minutes": 7,
+        "tools": ["beard trimmer", "scissors", "beard oil", "brush", "blow dryer"]
+      },
+      "growth_weeks": 6,
+      "face_shapes_ideal": ["round", "oval", "square"],
+      "face_shapes_avoid": ["oblong"],
+      "tags": ["stylish", "masculine", "distinguished", "statement"],
+      "difficulty": "medium",
+      "popularity_rank": 7
+    },
+    {
+      "id": "garibaldi",
+      "name": "Garibaldi",
+      "name_bs": "Garibaldi",
+      "slug": "garibaldi",
+      "test_priority": null,
+      "prompt_block_3": "wide thick rounded full beard 15-20cm length, natural untrimmed bottom edge with wild organic texture, impressive volume and width extending beyond jawline, rounded bottom shape showing natural fullness, emphasis on showing natural untamed fullness and volume",
+      "characteristics": {
+        "coverage": "full",
+        "density": "very dense",
+        "mustache_connection": "connected",
+        "shape": "rounded/natural",
+        "length_cm": "15-20"
+      },
+      "maintenance": {
+        "level": "low",
+        "trimming_frequency": "monthly",
+        "daily_minutes": 5,
+        "tools": ["beard oil", "beard balm", "wide-tooth comb", "brush"]
+      },
+      "growth_weeks": 16,
+      "face_shapes_ideal": ["oval", "oblong", "diamond"],
+      "face_shapes_avoid": ["round"],
+      "tags": ["bold", "natural", "rugged", "statement"],
+      "difficulty": "easy",
+      "popularity_rank": 12
+    },
+    {
+      "id": "mutton-chops",
+      "name": "Mutton Chops",
+      "name_bs": "Zalisci",
+      "slug": "mutton-chops",
+      "test_priority": null,
+      "prompt_block_3": "thick prominent sideburns extending down to jawline, NO chin beard - chin is completely clean shaven (IMPORTANT), wide flared sideburns creating vintage dramatic look, clean shaven chin and upper lip area visible, emphasis on showing sideburn shape and clean shaven chin contrast",
+      "characteristics": {
+        "coverage": "partial-sides",
+        "density": "dense",
+        "mustache_connection": "none",
+        "shape": "flared/wide",
+        "length_cm": "3-8"
+      },
+      "maintenance": {
+        "level": "high",
+        "trimming_frequency": "every 2-3 days",
+        "daily_minutes": 10,
+        "tools": ["precision trimmer", "razor", "scissors"]
+      },
+      "growth_weeks": 6,
+      "face_shapes_ideal": ["oval", "oblong"],
+      "face_shapes_avoid": ["round", "square"],
+      "tags": ["vintage", "bold", "unique", "statement"],
+      "difficulty": "hard",
+      "popularity_rank": 14
+    },
+    {
+      "id": "anchor-beard",
+      "name": "Anchor Beard",
+      "name_bs": "Sidro Brada",
+      "slug": "anchor-beard",
+      "test_priority": null,
+      "prompt_block_3": "anchor-shaped chin beard with thin soul patch, pointed chin beard extending along jawline forming anchor shape, styled mustache above creating ship anchor silhouette, clean shaven cheeks showing anchor form clearly, emphasis on showing distinctive anchor shape clearly",
+      "characteristics": {
+        "coverage": "partial",
+        "density": "medium",
+        "mustache_connection": "connected-styled",
+        "shape": "anchor",
+        "length_cm": "2-4"
+      },
+      "maintenance": {
+        "level": "high",
+        "trimming_frequency": "every 2-3 days",
+        "daily_minutes": 12,
+        "tools": ["precision trimmer", "razor", "mustache wax", "scissors"]
+      },
+      "growth_weeks": 4,
+      "face_shapes_ideal": ["round", "square", "heart"],
+      "face_shapes_avoid": ["oblong"],
+      "tags": ["artistic", "precise", "unique", "stylish"],
+      "difficulty": "hard",
+      "popularity_rank": 11
+    },
+    {
+      "id": "chin-strap",
+      "name": "Chin Strap",
+      "name_bs": "Traka na Bradi",
+      "slug": "chin-strap",
+      "test_priority": null,
+      "prompt_block_3": "thin beard line following jawline contour from ear to ear, no cheek coverage, clean defined stripe along jaw only, may be connected or disconnected from sideburns, clean shaven upper cheeks and mustache area, emphasis on showing precise jaw contour line clearly",
+      "characteristics": {
+        "coverage": "minimal",
+        "density": "medium",
+        "mustache_connection": "none",
+        "shape": "linear/contour",
+        "length_mm": "3-8"
+      },
+      "maintenance": {
+        "level": "high",
+        "trimming_frequency": "every 2 days",
+        "daily_minutes": 8,
+        "tools": ["precision trimmer", "razor"]
+      },
+      "growth_weeks": 2,
+      "face_shapes_ideal": ["round", "oval"],
+      "face_shapes_avoid": ["oblong", "square"],
+      "tags": ["defined", "modern", "athletic", "precise"],
+      "difficulty": "hard",
+      "popularity_rank": 13
+    },
+    {
+      "id": "beardstache",
+      "name": "Beardstache",
+      "name_bs": "Brkostache",
+      "slug": "beardstache",
+      "test_priority": null,
+      "prompt_block_3": "prominent thick statement mustache as dominant focal point, full beard kept noticeably shorter than impressive mustache, mustache is the star - bold, thick, masculine focal element, clear contrast in length between mustache and beard, emphasis on showing mustache dominance and size contrast",
+      "characteristics": {
+        "coverage": "full",
+        "density": "medium-beard, dense-mustache",
+        "mustache_connection": "connected",
+        "shape": "contrast",
+        "mustache_length_cm": "2-4",
+        "beard_length_mm": "3-8"
+      },
+      "maintenance": {
+        "level": "medium",
+        "trimming_frequency": "every 3-4 days",
+        "daily_minutes": 8,
+        "tools": ["beard trimmer", "mustache wax", "scissors", "comb"]
+      },
+      "growth_weeks": 4,
+      "face_shapes_ideal": ["oval", "square", "diamond"],
+      "face_shapes_avoid": [],
+      "tags": ["bold", "masculine", "trendy", "statement"],
+      "difficulty": "medium",
+      "popularity_rank": 15
+    }
+  ],
+
+  "generation_order": {
+    "phase_1_test": ["full-beard", "stubble-3day", "van-dyke"],
+    "phase_2_batch": [
+      "clean-shaven",
+      "short-boxed-beard",
+      "corporate-beard",
+      "goatee",
+      "balbo",
+      "circle-beard",
+      "ducktail",
+      "garibaldi",
+      "mutton-chops",
+      "anchor-beard",
+      "chin-strap",
+      "beardstache"
+    ]
+  },
+
+  "output_variants": {
+    "base": {
+      "suffix": "",
+      "description": "Clean sketch without annotations"
+    },
+    "annotated_basic": {
+      "suffix": "-annotated",
+      "description": "With cheek line, neckline, length markers"
+    },
+    "annotated_advanced": {
+      "suffix": "-annotated-advanced",
+      "description": "With maintenance zones, tool icons, frequency"
+    },
+    "thumbnail": {
+      "suffix": "-thumb",
+      "dimensions": "400x400",
+      "description": "Thumbnail for cards and lists"
+    }
+  },
+
+  "quality_checks": {
+    "pixel_alignment_tolerance_px": 2,
+    "histogram_normalization": true,
+    "background_color": "#FFFFFF",
+    "dimensions_exact": "800x800"
+  },
+
+  "api_endpoints": {
+    "generate_single": "/api/generate/style/{style_id}",
+    "generate_batch": "/api/generate/batch",
+    "get_prompt": "/api/prompts/{style_id}"
+  }
+}

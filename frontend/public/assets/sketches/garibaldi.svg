@@ -1,0 +1,31 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+    <!-- Background -->
+    <rect width="400" height="400" fill="#FAFAFA"/>
+
+    <!-- Face outline (lower third only) -->
+    <path d="M100,50 Q100,180 100,250 Q200,350 300,250 Q300,180 300,50"
+          fill="none" stroke="#CCCCCC" stroke-width="1.5" opacity="0.5"/>
+
+    <!-- Jawline -->
+    <path d="M100,250 Q200,330 300,250"
+          fill="none" stroke="#999" stroke-width="2"/>
+
+    <!-- Nose hint (bottom only) -->
+    <ellipse cx="200" cy="60" rx="25" ry="15" fill="none" stroke="#CCC" stroke-width="1"/>
+
+    <!-- Lips -->
+    <path d="M170,180 Q200,195 230,180" fill="none" stroke="#AAA" stroke-width="1.5"/>
+    <path d="M175,185 Q200,200 225,185" fill="none" stroke="#BBB" stroke-width="1"/>
+
+    
+        <path d="M80,240 Q200,280 320,240 L320,380 Q200,420 80,380 Z" fill="none" stroke="#2D2D2D" stroke-width="2" opacity="0.8"/>
+    <path d="M80,240 Q200,280 320,240 L320,380 Q200,420 80,380 Z" fill="#E5E5E5" opacity="0.3"/>
+
+    <!-- Style label -->
+    <text x="200" y="385" text-anchor="middle" font-family="Arial, sans-serif"
+          font-size="14" fill="#666" font-weight="500">Garibaldi</text>
+
+    <!-- Technical marks -->
+    <line x1="50" y1="250" x2="70" y2="250" stroke="#4A90D9" stroke-width="1" opacity="0.5"/>
+    <line x1="330" y1="250" x2="350" y2="250" stroke="#4A90D9" stroke-width="1" opacity="0.5"/>
+</svg>

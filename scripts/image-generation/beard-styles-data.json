@@ -1,0 +1,169 @@
+{
+  "version": "1.0.0",
+  "generated": "2024",
+  "locked_prompt": "Create an extreme close-up technical illustration, showing ONLY the lower third of face from bottom of nose to neck, NO eyes visible, NO forehead, NO upper face, crop tightly to show: mustache area, chin, jawline, and neckline only, camera angle: perfectly frontal, orthographic-like view, no perspective distortion, no tilt, no rotation, symmetrical left and right jaw alignment, only the lower nostrils barely visible at top edge, nostrils cropped identically across all images, professional graphite pencil sketch style with precise clean linework, subtle crosshatch shading to show volume and texture, isolated on pure white background (#FFFFFF), blueprint technical drawing aesthetic, neutral grayscale only - no color, no skin tones, non-artistic technical reference illustration, barber reference diagram style, high detail on beard hair texture, composition: lower face only as if cutting portrait below nose",
+  "negative_prompt": "full face, complete person, eyes visible, forehead showing, portrait, headshot, photorealistic skin, color photography, upper face, nose detail, hair on head, ears prominent, artistic portrait, character art, emotional expression, wide shot, full head visible, celebrity likeness, color, skin color, ethnic features, background elements, cartoon, anime, artistic interpretation, watercolor, oil painting, low quality, blurry, text, watermark, signature, tilted angle, rotated view, 3D perspective, asymmetrical composition",
+  "midjourney_params": "--style raw --ar 1:1 --stylize 150 --v 6.1",
+  "styles": [
+    {
+      "id": 1,
+      "slug": "full-beard",
+      "name": "Full Beard",
+      "prompt_addition": "8-12cm length beard with natural rounded shape and dense even coverage, connected mustache flowing seamlessly into beard, covers entire chin and jawline with impressive volume, high detail on beard hair texture showing fullness",
+      "characteristics": ["dense", "connected mustache", "rounded", "8-12cm"],
+      "maintenance": "medium",
+      "growth_weeks": 8,
+      "focus": "Volumen i tekstura"
+    },
+    {
+      "id": 2,
+      "slug": "stubble-3day",
+      "name": "Stubble (3-Day Shadow)",
+      "prompt_addition": "very short facial hair 2-3mm creating subtle shadow effect, light stippling dotwork texture technique to show short stubble, skin texture visible through short hair, defined jawline clearly showing, focus on showing even stubble distribution and length",
+      "characteristics": ["short", "stippling", "visible jawline", "2-3mm"],
+      "maintenance": "low",
+      "growth_weeks": 0.5,
+      "focus": "Stippling tehnika"
+    },
+    {
+      "id": 3,
+      "slug": "van-dyke",
+      "name": "Van Dyke",
+      "prompt_addition": "pointed chin beard DISCONNECTED from styled upward-curved mustache, clear visible gap between mustache and chin beard IMPORTANT separation, elegant refined pointed shape on chin only, clean shaven cheeks and upper lip sides visible, emphasis on showing the disconnection and gap clearly",
+      "characteristics": ["pointed", "disconnected", "mustache gap", "elegant"],
+      "maintenance": "high",
+      "growth_weeks": 4,
+      "focus": "GAP izmedju brka i brade"
+    },
+    {
+      "id": 4,
+      "slug": "clean-shaven",
+      "name": "Clean Shaven",
+      "prompt_addition": "completely smooth skin with no facial hair at all, clear defined jawline contour showing bone structure, emphasis on showing smooth clean skin and jaw shape",
+      "characteristics": ["smooth", "no hair", "defined jawline"],
+      "maintenance": "high",
+      "growth_weeks": 0,
+      "focus": "Glatka koza, vilica"
+    },
+    {
+      "id": 5,
+      "slug": "short-boxed-beard",
+      "name": "Short Boxed Beard",
+      "prompt_addition": "precisely trimmed 5-8mm length with sharp geometric edges, clean defined cheek line and neckline creating squared-off shape, neat professional appearance with visible precision trimming, emphasis on sharp edges and geometric precision",
+      "characteristics": ["geometric", "sharp edges", "5-8mm", "professional"],
+      "maintenance": "medium",
+      "growth_weeks": 3,
+      "focus": "Ostre linije"
+    },
+    {
+      "id": 6,
+      "slug": "corporate-beard",
+      "name": "Corporate Beard",
+      "prompt_addition": "medium length 1-2cm with well-maintained neat appearance, balanced proportions with subtle taper at cheek areas, professional groomed look with even density throughout, emphasis on professional neat grooming and balance",
+      "characteristics": ["balanced", "professional", "1-2cm", "tapered"],
+      "maintenance": "medium",
+      "growth_weeks": 4,
+      "focus": "Balans i urednost"
+    },
+    {
+      "id": 7,
+      "slug": "goatee",
+      "name": "Goatee",
+      "prompt_addition": "chin beard connected to mustache forming continuous goatee, clean shaven cheeks with clear visible contrast, rounded or pointed bottom shape on chin area only, emphasis on showing clean cheek separation and goatee shape",
+      "characteristics": ["chin only", "connected", "clean cheeks"],
+      "maintenance": "medium",
+      "growth_weeks": 3,
+      "focus": "Cisti obrazi"
+    },
+    {
+      "id": 8,
+      "slug": "balbo",
+      "name": "Balbo",
+      "prompt_addition": "disconnected mustache and chin beard with NO sideburns, floating chin beard with soul patch, styled mustache above, clear gap visible between mustache and chin beard, clean shaven cheeks and jaw sides showing separation, emphasis on showing disconnected elements and gaps clearly",
+      "characteristics": ["disconnected", "floating", "no sideburns", "soul patch"],
+      "maintenance": "high",
+      "growth_weeks": 4,
+      "focus": "Disconnected elementi"
+    },
+    {
+      "id": 9,
+      "slug": "circle-beard",
+      "name": "Circle Beard",
+      "prompt_addition": "rounded goatee connecting mustache and chin in perfect circular shape, clean shaven cheeks with smooth rounded contour, symmetrical circular appearance around mouth area, emphasis on perfect circular shape and symmetry",
+      "characteristics": ["circular", "symmetrical", "rounded", "connected"],
+      "maintenance": "medium",
+      "growth_weeks": 3,
+      "focus": "Simetrija"
+    },
+    {
+      "id": 10,
+      "slug": "ducktail",
+      "name": "Ducktail",
+      "prompt_addition": "full beard with pointed bottom resembling duck tail shape, longer at chin tapering to distinctive point, full coverage on sides with triangular bottom shape, dense texture throughout with emphasis on pointed tip",
+      "characteristics": ["pointed", "duck tail", "full sides", "tapered"],
+      "maintenance": "medium",
+      "growth_weeks": 10,
+      "focus": "Duck tail vrh"
+    },
+    {
+      "id": 11,
+      "slug": "garibaldi",
+      "name": "Garibaldi",
+      "prompt_addition": "wide thick rounded full beard 15-20cm length, natural untrimmed bottom edge with wild organic texture, impressive volume and width extending beyond jawline, rounded bottom shape showing natural fullness, emphasis on showing natural untamed fullness and volume",
+      "characteristics": ["wide", "thick", "natural", "15-20cm", "untrimmed"],
+      "maintenance": "low",
+      "growth_weeks": 12,
+      "focus": "Wild texture"
+    },
+    {
+      "id": 12,
+      "slug": "mutton-chops",
+      "name": "Mutton Chops",
+      "prompt_addition": "thick prominent sideburns extending down to jawline, NO chin beard chin is completely clean shaven IMPORTANT, wide flared sideburns creating vintage dramatic look, clean shaven chin and upper lip area visible, emphasis on showing sideburn shape and clean shaven chin contrast",
+      "characteristics": ["sideburns only", "no chin", "flared", "vintage"],
+      "maintenance": "high",
+      "growth_weeks": 6,
+      "focus": "CISTA brada"
+    },
+    {
+      "id": 13,
+      "slug": "anchor-beard",
+      "name": "Anchor Beard",
+      "prompt_addition": "anchor-shaped chin beard with thin soul patch, pointed chin beard extending along jawline forming anchor shape, styled mustache above creating ship anchor silhouette, clean shaven cheeks showing anchor form clearly, emphasis on showing distinctive anchor shape clearly",
+      "characteristics": ["anchor shape", "soul patch", "pointed", "jawline extension"],
+      "maintenance": "high",
+      "growth_weeks": 5,
+      "focus": "Anchor silueta"
+    },
+    {
+      "id": 14,
+      "slug": "chin-strap",
+      "name": "Chin Strap",
+      "prompt_addition": "thin beard line following jawline contour from ear to ear, no cheek coverage clean defined stripe along jaw only, may be connected or disconnected from sideburns, clean shaven upper cheeks and mustache area, emphasis on showing precise jaw contour line clearly",
+      "characteristics": ["thin line", "jawline only", "no cheeks", "stripe"],
+      "maintenance": "high",
+      "growth_weeks": 3,
+      "focus": "Jaw contour"
+    },
+    {
+      "id": 15,
+      "slug": "beardstache",
+      "name": "Beardstache",
+      "prompt_addition": "prominent thick statement mustache as dominant focal point, full beard kept noticeably shorter than impressive mustache, mustache is the star bold thick masculine focal element, clear contrast in length between mustache and beard, emphasis on showing mustache dominance and size contrast",
+      "characteristics": ["dominant mustache", "short beard", "contrast", "bold"],
+      "maintenance": "medium",
+      "growth_weeks": 4,
+      "focus": "Mustache + kontrast"
+    },
+    {
+      "id": 16,
+      "slug": "handlebar",
+      "name": "Handlebar",
+      "prompt_addition": "prominent handlebar mustache with distinctive curved upward-pointing ends, mustache ends curve upward and outward in classic handlebar shape, medium beard below 1-2cm as supporting element, waxed-looking pointed mustache tips extending beyond lip width, clear handlebar silhouette visible, upward curves pointed tips classic handlebar",
+      "characteristics": ["handlebar", "upward curves", "waxed tips", "medium beard"],
+      "maintenance": "high",
+      "growth_weeks": 6,
+      "focus": "Handlebar mustache silueta"
+    }
+  ]
+}

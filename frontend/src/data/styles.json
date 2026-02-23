@@ -1,0 +1,510 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "generated": "2026-02-09",
+  "styles": [
+    {
+      "id": "clean-shaven",
+      "name": "Clean Shaven",
+      "family": "clean_shaven",
+      "length_class": "none",
+      "rules": {
+        "must": [
+          "No visible facial hair anywhere",
+          "Smooth skin texture throughout",
+          "Clean jawline definition"
+        ],
+        "must_not": [
+          "Any stubble or shadow",
+          "Visible hair follicles",
+          "Patchy areas suggesting growth"
+        ],
+        "notes": [
+          "Reference for 'no beard' baseline",
+          "Used for before/after comparisons"
+        ]
+      },
+      "ui": {
+        "tags": ["Clean", "Professional", "Classic"],
+        "filters": {
+          "coverage": "none",
+          "cheeks": "clean",
+          "neckline": "none",
+          "bottom_shape": "none",
+          "maintenance": "high"
+        }
+      }
+    },
+    {
+      "id": "stubble-3day",
+      "name": "3-Day Stubble",
+      "family": "stubble",
+      "length_class": "stubble_2_3mm",
+      "rules": {
+        "must": [
+          "Uniform stubble coverage 2-3mm",
+          "Even density across face",
+          "Natural growth pattern visible"
+        ],
+        "must_not": [
+          "Clean-shaven patches",
+          "Length exceeding 5mm",
+          "Styled or shaped edges"
+        ],
+        "notes": [
+          "Most popular casual style",
+          "Requires trimming every 2-3 days"
+        ]
+      },
+      "ui": {
+        "tags": ["Stubble", "Casual", "Low-effort"],
+        "filters": {
+          "coverage": "full_lower_face",
+          "cheeks": "covered",
+          "neckline": "soft",
+          "bottom_shape": "none",
+          "maintenance": "low"
+        }
+      }
+    },
+    {
+      "id": "short-boxed-beard",
+      "name": "Short Boxed Beard",
+      "family": "full_beard",
+      "length_class": "short_10_15mm",
+      "rules": {
+        "must": [
+          "Length 10-15mm uniformly",
+          "Sharp cheek line definition",
+          "Clean neckline below jaw",
+          "Squared-off bottom contour"
+        ],
+        "must_not": [
+          "Rounded or natural bottom shape",
+          "Undefined cheek lines",
+          "Length variation >3mm"
+        ],
+        "notes": [
+          "Corporate-friendly full beard",
+          "Weekly barber maintenance recommended"
+        ]
+      },
+      "ui": {
+        "tags": ["Full Beard", "Short", "Professional", "Defined"],
+        "filters": {
+          "coverage": "full_lower_face",
+          "cheeks": "covered",
+          "neckline": "defined",
+          "bottom_shape": "u_trimmed",
+          "maintenance": "high"
+        }
+      }
+    },
+    {
+      "id": "corporate-beard",
+      "name": "Corporate Beard",
+      "family": "full_beard",
+      "length_class": "medium_20_35mm",
+      "rules": {
+        "must": [
+          "Length 20-35mm",
+          "Immaculately groomed edges",
+          "Professional appearance",
+          "Defined cheek and neckline"
+        ],
+        "must_not": [
+          "Stray hairs or flyaways",
+          "Uneven density",
+          "Overly natural/rugged appearance"
+        ],
+        "notes": [
+          "Boardroom-appropriate",
+          "Requires daily grooming"
+        ]
+      },
+      "ui": {
+        "tags": ["Full Beard", "Medium", "Executive", "Polished"],
+        "filters": {
+          "coverage": "full_lower_face",
+          "cheeks": "covered",
+          "neckline": "defined",
+          "bottom_shape": "u_trimmed",
+          "maintenance": "high"
+        }
+      }
+    },
+    {
+      "id": "full-beard",
+      "name": "Full Beard",
+      "family": "full_beard",
+      "length_class": "medium_20_35mm",
+      "rules": {
+        "must": [
+          "Complete coverage of lower face",
+          "Connected mustache and chin",
+          "Cheeks fully covered",
+          "Natural but groomed appearance"
+        ],
+        "must_not": [
+          "Shaved cheeks or patches",
+          "Disconnected mustache",
+          "Unkempt or wild appearance"
+        ],
+        "notes": [
+          "Classic masculine style",
+          "Versatile for most face shapes"
+        ]
+      },
+      "ui": {
+        "tags": ["Full Beard", "Classic", "Masculine"],
+        "filters": {
+          "coverage": "full_lower_face",
+          "cheeks": "covered",
+          "neckline": "defined",
+          "bottom_shape": "rounded_natural",
+          "maintenance": "medium"
+        }
+      }
+    },
+    {
+      "id": "garibaldi",
+      "name": "Garibaldi",
+      "family": "garibaldi",
+      "length_class": "long_50_80mm",
+      "rules": {
+        "must": [
+          "Length 50-80mm",
+          "Wide, rounded bottom contour",
+          "Natural untrimmed appearance",
+          "Full cheek coverage"
+        ],
+        "must_not": [
+          "Defined/sharp neckline",
+          "Pointed or tapered bottom",
+          "Over-styled appearance",
+          "Length exceeding 80mm"
+        ],
+        "notes": [
+          "Italian statesman inspired",
+          "Natural growth, minimal shaping",
+          "Key differentiator: NO defined neckline"
+        ]
+      },
+      "ui": {
+        "tags": ["Garibaldi", "Long", "Natural", "Rounded"],
+        "filters": {
+          "coverage": "full_lower_face",
+          "cheeks": "covered",
+          "neckline": "none",
+          "bottom_shape": "rounded_natural",
+          "maintenance": "low"
+        }
+      }
+    },
+    {
+      "id": "ducktail",
+      "name": "Ducktail",
+      "family": "full_beard",
+      "length_class": "medium_20_35mm",
+      "rules": {
+        "must": [
+          "Pointed chin extension",
+          "Tapered sides to point",
+          "Full cheek coverage",
+          "Defined neckline"
+        ],
+        "must_not": [
+          "Rounded bottom contour",
+          "Flat or squared bottom",
+          "Disconnected chin point"
+        ],
+        "notes": [
+          "Named for duck tail shape",
+          "Elongates face visually",
+          "Requires skilled shaping"
+        ]
+      },
+      "ui": {
+        "tags": ["Ducktail", "Pointed", "Stylish"],
+        "filters": {
+          "coverage": "full_lower_face",
+          "cheeks": "covered",
+          "neckline": "defined",
+          "bottom_shape": "pointed",
+          "maintenance": "high"
+        }
+      }
+    },
+    {
+      "id": "goatee",
+      "name": "Goatee",
+      "family": "goatee_family",
+      "length_class": "short_10_15mm",
+      "rules": {
+        "must": [
+          "Chin beard present",
+          "Mustache connected to chin",
+          "Clean-shaven cheeks (sharp contrast)",
+          "Defined edges"
+        ],
+        "must_not": [
+          "Any hair on cheeks",
+          "Disconnected mustache (that's Van Dyke)",
+          "Soul patch only"
+        ],
+        "notes": [
+          "Classic goatee = connected",
+          "Slims round faces"
+        ]
+      },
+      "ui": {
+        "tags": ["Goatee", "Clean Cheeks", "Classic"],
+        "filters": {
+          "coverage": "chin_mustache",
+          "cheeks": "clean",
+          "neckline": "defined",
+          "bottom_shape": "rounded_natural",
+          "maintenance": "high"
+        }
+      }
+    },
+    {
+      "id": "van-dyke",
+      "name": "Van Dyke",
+      "family": "goatee_family",
+      "length_class": "short_10_15mm",
+      "rules": {
+        "must": [
+          "Mustache NOT connected to chin beard",
+          "Clear gap between mustache and goatee",
+          "Clean-shaven cheeks",
+          "Pointed or styled chin beard"
+        ],
+        "must_not": [
+          "Connected mustache-chin (that's Goatee)",
+          "Hair on cheeks",
+          "Rounded chin beard"
+        ],
+        "notes": [
+          "Named after painter Anthony van Dyck",
+          "Artistic, distinguished look"
+        ]
+      },
+      "ui": {
+        "tags": ["Van Dyke", "Disconnected", "Artistic"],
+        "filters": {
+          "coverage": "chin_mustache",
+          "cheeks": "clean",
+          "neckline": "defined",
+          "bottom_shape": "pointed",
+          "maintenance": "high"
+        }
+      }
+    },
+    {
+      "id": "balbo",
+      "name": "Balbo",
+      "family": "goatee_family",
+      "length_class": "short_10_15mm",
+      "rules": {
+        "must": [
+          "Floating mustache (not connected)",
+          "Chin beard with soul patch",
+          "Clean cheeks",
+          "Defined jawline beard section"
+        ],
+        "must_not": [
+          "Connected mustache",
+          "Full cheek coverage",
+          "Extended sideburns"
+        ],
+        "notes": [
+          "Named after Italo Balbo",
+          "Popular Hollywood style",
+          "Robert Downey Jr. signature look"
+        ]
+      },
+      "ui": {
+        "tags": ["Balbo", "Hollywood", "Stylish"],
+        "filters": {
+          "coverage": "chin_mustache",
+          "cheeks": "clean",
+          "neckline": "defined",
+          "bottom_shape": "u_trimmed",
+          "maintenance": "high"
+        }
+      }
+    },
+    {
+      "id": "circle-beard",
+      "name": "Circle Beard",
+      "family": "goatee_family",
+      "length_class": "short_10_15mm",
+      "rules": {
+        "must": [
+          "Mustache connected to chin beard",
+          "Circular/oval shape around mouth",
+          "Clean-shaven cheeks",
+          "Symmetrical rounded form"
+        ],
+        "must_not": [
+          "Pointed chin",
+          "Disconnected mustache",
+          "Cheek hair"
+        ],
+        "notes": [
+          "Also called 'door knocker'",
+          "Softer than angular goatee",
+          "Good for round faces"
+        ]
+      },
+      "ui": {
+        "tags": ["Circle Beard", "Rounded", "Connected"],
+        "filters": {
+          "coverage": "chin_mustache",
+          "cheeks": "clean",
+          "neckline": "defined",
+          "bottom_shape": "rounded_natural",
+          "maintenance": "medium"
+        }
+      }
+    },
+    {
+      "id": "anchor-beard",
+      "name": "Anchor Beard",
+      "family": "goatee_family",
+      "length_class": "short_10_15mm",
+      "rules": {
+        "must": [
+          "Pointed chin beard (anchor point)",
+          "Thin jawline beard extending up",
+          "Mustache (pencil or shaped)",
+          "Clean cheeks",
+          "Anchor shape when viewed"
+        ],
+        "must_not": [
+          "Rounded chin",
+          "Full cheek coverage",
+          "Connected to sideburns"
+        ],
+        "notes": [
+          "Nautical anchor shape",
+          "Requires precise shaping",
+          "Dramatic, artistic style"
+        ]
+      },
+      "ui": {
+        "tags": ["Anchor", "Pointed", "Artistic"],
+        "filters": {
+          "coverage": "chin_mustache",
+          "cheeks": "clean",
+          "neckline": "defined",
+          "bottom_shape": "pointed",
+          "maintenance": "high"
+        }
+      }
+    },
+    {
+      "id": "chin-strap",
+      "name": "Chin Strap",
+      "family": "chin_strap_family",
+      "length_class": "stubble_2_3mm",
+      "rules": {
+        "must": [
+          "Thin line along jawline",
+          "Connects sideburns under chin",
+          "Clean-shaven cheeks and neck",
+          "Uniform thin width"
+        ],
+        "must_not": [
+          "Wide beard mass",
+          "Cheek coverage",
+          "Disconnected sections"
+        ],
+        "notes": [
+          "Defines jawline sharply",
+          "Popular with younger demographic",
+          "Requires daily maintenance"
+        ]
+      },
+      "ui": {
+        "tags": ["Chin Strap", "Sharp", "Defined Jaw"],
+        "filters": {
+          "coverage": "chin_only",
+          "cheeks": "clean",
+          "neckline": "defined",
+          "bottom_shape": "u_trimmed",
+          "maintenance": "high"
+        }
+      }
+    },
+    {
+      "id": "mutton-chops",
+      "name": "Mutton Chops",
+      "family": "mutton_chops_family",
+      "length_class": "medium_20_35mm",
+      "rules": {
+        "must": [
+          "Extended sideburns down cheeks",
+          "Wide cheek coverage",
+          "Clean-shaven chin",
+          "No mustache (classic version)"
+        ],
+        "must_not": [
+          "Connected under chin",
+          "Chin beard",
+          "Minimal sideburn width"
+        ],
+        "notes": [
+          "Victorian era classic",
+          "Bold, statement style",
+          "Wolverine iconic look"
+        ]
+      },
+      "ui": {
+        "tags": ["Mutton Chops", "Sideburns", "Bold"],
+        "filters": {
+          "coverage": "chin_only",
+          "cheeks": "covered",
+          "neckline": "none",
+          "bottom_shape": "none",
+          "maintenance": "medium"
+        }
+      }
+    },
+    {
+      "id": "beardstache",
+      "name": "Beardstache",
+      "family": "stubble",
+      "length_class": "stubble_2_3mm",
+      "rules": {
+        "must": [
+          "Prominent, full mustache",
+          "Heavy stubble on chin/cheeks",
+          "Mustache significantly longer than stubble",
+          "Clear length contrast"
+        ],
+        "must_not": [
+          "Equal length mustache and beard",
+          "Clean-shaven face",
+          "Full beard length matching mustache"
+        ],
+        "notes": [
+          "Trending hybrid style",
+          "Best of both worlds",
+          "Mustache is the star"
+        ]
+      },
+      "ui": {
+        "tags": ["Beardstache", "Mustache Focus", "Trendy"],
+        "filters": {
+          "coverage": "full_lower_face",
+          "cheeks": "partial",
+          "neckline": "soft",
+          "bottom_shape": "none",
+          "maintenance": "medium"
+        }
+      }
+    }
+  ]
+}

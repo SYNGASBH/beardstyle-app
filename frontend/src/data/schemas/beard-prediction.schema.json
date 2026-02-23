@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://beard-style-app.local/schemas/beard-prediction.json",
+  "title": "BeardPrediction",
+  "description": "Schema for ML inference output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["image_id", "quality", "crop", "style", "prediction"],
+  "properties": {
+    "image_id": {
+      "type": "string",
+      "description": "Unique identifier for the analyzed image"
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accepted", "reasons", "scores"],
+      "properties": {
+        "accepted": {
+          "type": "boolean",
+          "description": "Whether image passes quality threshold"
+        },
+        "reasons": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Rejection reason codes if not accepted"
+        },
+        "scores": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["crop_score", "symmetry_score", "background_score", "graphite_score", "off_spec_score"],
+          "properties": {
+            "crop_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Score for correct cropping (lower face only)"
+            },
+            "symmetry_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Horizontal symmetry score"
+            },
+            "background_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "White background purity score"
+            },
+            "graphite_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Graphite illustration style adherence"
+            },
+            "off_spec_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Overall off-specification score (lower is better)"
+            }
+          }
+        }
+      }
+    },
+    "crop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["only_lower_face", "nostrils_visible", "eyes_absent", "ears_absent"],
+      "properties": {
+        "only_lower_face": {
+          "type": "boolean",
+          "description": "True if only lower face is shown"
+        },
+        "nostrils_visible": {
+          "type": "boolean",
+          "description": "True if nostrils are barely visible at top"
+        },
+        "eyes_absent": {
+          "type": "boolean",
+          "description": "True if no eyes are visible"
+        },
+        "ears_absent": {
+          "type": "boolean",
+          "description": "True if no ears are visible"
+        }
+      }
+    },
+    "style": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["graphite", "grayscale_only", "white_background"],
+      "properties": {
+        "graphite": {
+          "type": "boolean",
+          "description": "True if graphite illustration style"
+        },
+        "grayscale_only": {
+          "type": "boolean",
+          "description": "True if no color tint detected"
+        },
+        "white_background": {
+          "type": "boolean",
+          "description": "True if background is pure white"
+        }
+      }
+    },
+    "prediction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["top1", "topk", "attributes"],
+      "properties": {
+        "top1": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["style_id", "confidence"],
+          "properties": {
+            "style_id": { "type": "string" },
+            "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "topk": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["style_id", "confidence"],
+            "properties": {
+              "style_id": { "type": "string" },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["coverage", "cheeks", "neckline", "bottom_shape", "length_class"],
+          "properties": {
+            "coverage": { "type": "string" },
+            "cheeks": { "type": "string" },
+            "neckline": { "type": "string" },
+            "bottom_shape": { "type": "string" },
+            "length_class": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

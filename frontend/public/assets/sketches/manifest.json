@@ -1,0 +1,117 @@
+﻿{
+    "styles":  [
+                   {
+                       "main":  "/assets/sketches/full-beard.webp",
+                       "thumbnail":  "/assets/thumbnails/full-beard-thumb.webp",
+                       "thumbnailExists":  true,
+                       "slug":  "full-beard",
+                       "exists":  true
+                   },
+                   {
+                       "main":  "/assets/sketches/stubble-3day.webp",
+                       "thumbnail":  "/assets/thumbnails/stubble-3day-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "stubble-3day",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/van-dyke.webp",
+                       "thumbnail":  "/assets/thumbnails/van-dyke-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "van-dyke",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/clean-shaven.webp",
+                       "thumbnail":  "/assets/thumbnails/clean-shaven-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "clean-shaven",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/short-boxed-beard.webp",
+                       "thumbnail":  "/assets/thumbnails/short-boxed-beard-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "short-boxed-beard",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/corporate-beard.webp",
+                       "thumbnail":  "/assets/thumbnails/corporate-beard-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "corporate-beard",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/goatee.webp",
+                       "thumbnail":  "/assets/thumbnails/goatee-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "goatee",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/balbo.webp",
+                       "thumbnail":  "/assets/thumbnails/balbo-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "balbo",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/circle-beard.webp",
+                       "thumbnail":  "/assets/thumbnails/circle-beard-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "circle-beard",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/ducktail.webp",
+                       "thumbnail":  "/assets/thumbnails/ducktail-thumb.webp",
+                       "thumbnailExists":  true,
+                       "slug":  "ducktail",
+                       "exists":  true
+                   },
+                   {
+                       "main":  "/assets/sketches/garibaldi.webp",
+                       "thumbnail":  "/assets/thumbnails/garibaldi-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "garibaldi",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/mutton-chops.webp",
+                       "thumbnail":  "/assets/thumbnails/mutton-chops-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "mutton-chops",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/anchor-beard.webp",
+                       "thumbnail":  "/assets/thumbnails/anchor-beard-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "anchor-beard",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/chin-strap.webp",
+                       "thumbnail":  "/assets/thumbnails/chin-strap-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "chin-strap",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/beardstache.webp",
+                       "thumbnail":  "/assets/thumbnails/beardstache-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "beardstache",
+                       "exists":  false
+                   },
+                   {
+                       "main":  "/assets/sketches/handlebar.webp",
+                       "thumbnail":  "/assets/thumbnails/handlebar-thumb.webp",
+                       "thumbnailExists":  false,
+                       "slug":  "handlebar",
+                       "exists":  false
+                   }
+               ],
+    "generated":  "2026-02-22 00:00:00"
+}
