@@ -2,6 +2,9 @@ const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs').promises;
 const path = require('path');
 
+// Model configurable via env var; fallback to last known-working ID
+const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-5-20250929';
+
 // Initialize Claude client
 const anthropic = new Anthropic({
   apiKey: process.env.CLAUDE_API_KEY,
@@ -109,7 +112,7 @@ Odgovori STRIKTNO u JSON formatu, bez dodatnog teksta, sa sledećom strukturom:
 
       // Call Claude API with vision
       const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
+        model: CLAUDE_MODEL,
         max_tokens: 4096,
         messages: [
           {
@@ -145,7 +148,7 @@ Odgovori STRIKTNO u JSON formatu, bez dodatnog teksta, sa sledećom strukturom:
 
       // Add metadata
       analysis.analyzedAt = new Date().toISOString();
-      analysis.modelUsed = 'claude-sonnet-4-6';
+      analysis.modelUsed = CLAUDE_MODEL;
       analysis.confidence = analysis.faceShapeConfidence || 85;
 
       return analysis;
@@ -214,7 +217,7 @@ Daj praktične, personalizirane savjete u JSON formatu:
 }`;
 
       const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
+        model: CLAUDE_MODEL,
         max_tokens: 2048,
         messages: [
           {
@@ -264,7 +267,7 @@ Daj odgovor u JSON formatu sa sledećim poljima:
 }`;
 
       const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
+        model: CLAUDE_MODEL,
         max_tokens: 1536,
         messages: [
           {
