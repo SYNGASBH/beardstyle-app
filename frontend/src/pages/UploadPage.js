@@ -2,6 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../services/api';
 import useAuthStore from '../context/useAuthStore';
+import { detectFaceShape, loadFaceMesh } from '../utils/faceShape';
+
+const SHAPE_LABELS = {
+  oval:        { label: 'Oval',         color: 'bg-green-100 text-green-800'  },
+  round:       { label: 'Okruglo',      color: 'bg-blue-100 text-blue-800'    },
+  square:      { label: 'Kvadratno',    color: 'bg-orange-100 text-orange-800' },
+  rectangular: { label: 'Pravougaono',  color: 'bg-purple-100 text-purple-800' },
+  diamond:     { label: 'Dijamant',     color: 'bg-yellow-100 text-yellow-800' },
+  triangle:    { label: 'Trougao',      color: 'bg-red-100 text-red-800'      },
+};
 
 const UploadPage = () => {
   const navigate = useNavigate();
@@ -17,25 +27,48 @@ const UploadPage = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState(null);
-  const [useCamera, setUseCamera] = useState(false);
-  const [stream, setStream] = useState(null);
+  // Preload MediaPipe FaceMesh script on mount (so WASM is ready when user picks image)
+  useEffect(() => {
+    loadFaceMesh();
+  }, []);
+
+  const [uploadedImage, setUploadedImage]         = useState(null);
+  const [previewUrl, setPreviewUrl]               = useState(null);
+  const [isDragging, setIsDragging]               = useState(false);
+  const [isUploading, setIsUploading]             = useState(false);
+  const [error, setError]                         = useState(null);
+  const [useCamera, setUseCamera]                 = useState(false);
+  const [stream, setStream]                       = useState(null);
+  const [detectedFaceShape, setDetectedFaceShape] = useState(null);
+  const [faceShapeDetecting, setFaceShapeDetecting] = useState(false);
+
+  // Run local FaceMesh detection on a data-URL image
+  const runFaceDetection = (dataUrl) => {
+    setDetectedFaceShape(null);
+    setFaceShapeDetecting(true);
+    const img = new Image();
+    img.onload = async () => {
+      try {
+        const shape = await detectFaceShape(img);
+        setDetectedFaceShape(shape); // null → Claude will determine shape
+      } catch (_) {
+        // Silently ignore — Claude is the fallback
+      } finally {
+        setFaceShapeDetecting(false);
+      }
+    };
+    img.onerror = () => setFaceShapeDetecting(false);
+    img.src = dataUrl;
+  };
 
   // Handle file selection
   const handleFileSelect = (file) => {
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       setError('Molimo odaberite sliku (JPG, PNG, itd.)');
       return;
     }
-
-    // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       setError('Slika je prevelika. Maksimalna veličina je 10MB.');
       return;
@@ -44,10 +77,10 @@ const UploadPage = () => {
     setUploadedImage(file);
     setError(null);
 
-    // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewUrl(reader.result);
+      runFaceDetection(reader.result);
     };
     reader.readAsDataURL(file);
   };
@@ -66,33 +99,23 @@ const UploadPage = () => {
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    
-    const file = e.dataTransfer.files[0];
-    handleFileSelect(file);
+    handleFileSelect(e.dataTransfer.files[0]);
   };
 
-  // Handle click to upload
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
+  const handleClick = () => fileInputRef.current?.click();
 
-  const handleFileInput = (e) => {
-    const file = e.target.files[0];
-    handleFileSelect(file);
-  };
+  const handleFileInput = (e) => handleFileSelect(e.target.files[0]);
 
   // Camera functions
   const startCamera = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' } 
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user' },
       });
-      
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
         videoRef.current.play();
       }
-      
       setStream(mediaStream);
       setUseCamera(true);
       setError(null);
@@ -113,14 +136,10 @@ const UploadPage = () => {
   const capturePhoto = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    
     if (video && canvas) {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0);
-      
+      canvas.getContext('2d').drawImage(video, 0, 0);
       canvas.toBlob((blob) => {
         const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
         handleFileSelect(file);
@@ -145,22 +164,23 @@ const UploadPage = () => {
 
       const response = await userAPI.uploadImage(formData);
 
-      // Navigate to AI results page if AI analysis is available
+      const navState = {
+        uploadId:    response.data.upload.id,
+        imageUrl:    response.data.upload.fileUrl,
+        aiAnalysis:  response.data.aiAnalysis,
+        // Pass locally-detected shape so AIResultsPage can skip polling
+        faceShape:   detectedFaceShape || undefined,
+      };
+
       if (response.data.upload && response.data.upload.id) {
-        navigate('/ai-results', {
-          state: {
-            uploadId: response.data.upload.id,
-            imageUrl: response.data.upload.fileUrl,
-            aiAnalysis: response.data.aiAnalysis
-          }
-        });
+        navigate('/ai-results', { state: navState });
       } else {
-        // Fallback to questionnaire if no AI analysis
         navigate('/questionnaire', {
           state: {
-            uploadId: response.data.upload?.id,
-            imageUrl: response.data.upload?.fileUrl
-          }
+            uploadId:  response.data.upload?.id,
+            imageUrl:  response.data.upload?.fileUrl,
+            faceShape: detectedFaceShape || undefined,
+          },
         });
       }
     } catch (err) {
@@ -176,10 +196,12 @@ const UploadPage = () => {
     setUploadedImage(null);
     setPreviewUrl(null);
     setError(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    setDetectedFaceShape(null);
+    setFaceShapeDetecting(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
+
+  const shapeInfo = detectedFaceShape ? SHAPE_LABELS[detectedFaceShape] : null;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -205,8 +227,8 @@ const UploadPage = () => {
             className={`
               border-2 border-dashed rounded-lg p-12 text-center cursor-pointer
               transition-colors duration-200
-              ${isDragging 
-                ? 'border-red-500 bg-red-50' 
+              ${isDragging
+                ? 'border-red-500 bg-red-50'
                 : 'border-gray-300 hover:border-red-400 hover:bg-gray-50'
               }
             `}
@@ -218,27 +240,23 @@ const UploadPage = () => {
               onChange={handleFileInput}
               className="hidden"
             />
-            
-            <svg 
-              className="mx-auto h-16 w-16 text-gray-400 mb-4" 
-              fill="none" 
-              viewBox="0 0 24 24" 
+            <svg
+              className="mx-auto h-16 w-16 text-gray-400 mb-4"
+              fill="none"
+              viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" 
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            
             <p className="text-lg mb-2">
               {isDragging ? 'Ispustite sliku ovdje' : 'Kliknite ili prevucite sliku'}
             </p>
-            <p className="text-sm text-gray-500">
-              PNG, JPG ili JPEG do 10MB
-            </p>
+            <p className="text-sm text-gray-500">PNG, JPG ili JPEG do 10MB</p>
           </div>
 
           {/* Camera Option */}
@@ -262,12 +280,7 @@ const UploadPage = () => {
       {useCamera && (
         <div className="space-y-4">
           <div className="relative bg-black rounded-lg overflow-hidden">
-            <video
-              ref={videoRef}
-              className="w-full"
-              autoPlay
-              playsInline
-            />
+            <video ref={videoRef} className="w-full" autoPlay playsInline />
           </div>
           <div className="flex gap-4 justify-center">
             <button
@@ -296,6 +309,25 @@ const UploadPage = () => {
               alt="Preview"
               className="w-full max-h-96 object-contain rounded"
             />
+
+            {/* Face shape detection result */}
+            <div className="mt-3 flex items-center gap-2 min-h-[28px]">
+              <span className="text-sm text-gray-500">Oblik lica:</span>
+              {faceShapeDetecting ? (
+                <span className="flex items-center gap-1.5 text-sm text-gray-400">
+                  <span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin inline-block" />
+                  Analiziram lokalno...
+                </span>
+              ) : shapeInfo ? (
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${shapeInfo.color}`}>
+                  {shapeInfo.label}
+                </span>
+              ) : (
+                <span className="text-xs text-gray-400 italic">
+                  Nije detektovano — AI će analizirati
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex gap-4">
