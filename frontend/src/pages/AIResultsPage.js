@@ -19,29 +19,36 @@ const AIResultsPage = () => {
   const loadAIResults = useCallback(async (uploadId) => {
     try {
       setLoading(true);
-
-      // First, get recommendations — this triggers lazy AI analysis if not yet done
+      // Prvo dohvati AI analizu (čekaj dok ne bude gotova)
+      let faceShape = uploadData?.faceShape || null;
+      let aiAnalysis = uploadData?.aiAnalysis || null;
+      if (!faceShape) {
+        let retries = 0;
+        const validShapes = ['oval', 'round', 'square', 'rectangle', 'triangle', 'diamond', 'heart', 'oblong'];
+        while (retries < 20) {
+          try {
+            const analysisResponse = await userAPI.getAIAnalysis(uploadId);
+            aiAnalysis = analysisResponse.data.analysis;
+            const rawShape = aiAnalysis?.faceShape || '';
+            const isValid = validShapes.some(s => rawShape.toLowerCase().includes(s));
+            if (isValid) { faceShape = rawShape; break; }
+            if (rawShape) { faceShape = 'oval'; break; } // AI done, shape nepoznat
+          } catch (e) {}
+          retries++;
+          await new Promise(r => setTimeout(r, 2000));
+        }
+        if (!faceShape) faceShape = 'oval';
+        setAnalysis(aiAnalysis);
+      }
+      // Sad pozovi recommend s faceShape
       const recResponse = await stylesAPI.getRecommendations({
-        uploadId: uploadId,
+        uploadId,
+        faceShape,
         lifestyle: uploadData?.lifestyle || 'casual',
         maintenancePreference: uploadData?.maintenancePreference || 'medium',
       });
-
       setRecommendations(recResponse.data.recommendations);
-
-      // If recommend returned AI analysis inline, use it
-      if (recResponse.data.aiAnalysis) {
-        setAnalysis(recResponse.data.aiAnalysis);
-      } else {
-        // Otherwise fetch the full analysis from the dedicated endpoint
-        try {
-          const analysisResponse = await userAPI.getAIAnalysis(uploadId);
-          setAnalysis(analysisResponse.data.analysis);
-        } catch (analysisErr) {
-          console.warn('AI analysis not available:', analysisErr);
-          // Continue without detailed analysis — recommendations still work
-        }
-      }
+      if (recResponse.data.aiAnalysis) setAnalysis(recResponse.data.aiAnalysis);
     } catch (err) {
       console.error('Failed to load AI results:', err);
       setError('Greška pri učitavanju rezultata. Pokušajte ponovo.');
