@@ -20,16 +20,18 @@ foreach ($file in $files) {
     Write-Host "Processing $($file.Name) ..." -ForegroundColor Yellow
 
     magick $file.FullName `
-        -resize $MainSize `
         -colorspace Gray `
+        -resize $MainSize `
+        -gravity center -extent $MainSize `
         -level 5%,95% `
         -background white -alpha remove -alpha off `
         -quality $Quality `
         $mainOutput
 
     magick $file.FullName `
-        -resize $ThumbSize `
         -colorspace Gray `
+        -resize $ThumbSize `
+        -gravity center -extent $ThumbSize `
         -background white -alpha remove -alpha off `
         -quality $Quality `
         $thumbOutput
