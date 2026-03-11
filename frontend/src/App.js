@@ -13,6 +13,7 @@ import SalonDashboard from './pages/SalonDashboard';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import TestOverlayPage from './pages/TestOverlayPage';
+import ARTryOnPage from './pages/ARTryOnPage';
 
 // Components
 import Navbar from './components/common/Navbar';
@@ -48,6 +49,7 @@ function App() {
               <Route path="/preview/:styleId" element={<PreviewPage />} />
               <Route path="/styles/:slug" element={<PreviewPage />} />
               <Route path="/test-overlay" element={<TestOverlayPage />} />
+              <Route path="/ar-tryon" element={<ARTryOnPage />} />
 
               {/* Auth Routes */}
               <Route path="/login" element={<LoginPage />} />

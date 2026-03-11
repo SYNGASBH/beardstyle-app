@@ -83,8 +83,46 @@ class BeardStyle {
 
     sql += ` GROUP BY bs.id ORDER BY bs.popularity_score DESC, bs.name ASC`;
 
+    // Pagination support
+    if (filters.limit) {
+      sql += ` LIMIT $${paramCount}`;
+      params.push(parseInt(filters.limit, 10));
+      paramCount++;
+    }
+    if (filters.offset) {
+      sql += ` OFFSET $${paramCount}`;
+      params.push(parseInt(filters.offset, 10));
+      paramCount++;
+    }
+
     const result = await query(sql, params);
     return result.rows;
+  }
+
+  // Count total styles matching filters (for pagination metadata)
+  static async countAll(filters = {}) {
+    let sql = `SELECT COUNT(DISTINCT bs.id) as total FROM beard_styles bs WHERE 1=1`;
+    const params = [];
+    let paramCount = 1;
+
+    if (filters.category) {
+      sql += ` AND bs.style_category = $${paramCount}`;
+      params.push(filters.category);
+      paramCount++;
+    }
+    if (filters.maintenanceLevel) {
+      sql += ` AND bs.maintenance_level = $${paramCount}`;
+      params.push(filters.maintenanceLevel);
+      paramCount++;
+    }
+    if (filters.search) {
+      sql += ` AND (bs.name ILIKE $${paramCount} OR bs.description ILIKE $${paramCount})`;
+      params.push(`%${filters.search}%`);
+      paramCount++;
+    }
+
+    const result = await query(sql, params);
+    return parseInt(result.rows[0].total, 10);
   }
 
   // Get single beard style by ID

@@ -101,8 +101,30 @@ const BeardStylePreview = ({
 
           const overlayImg = new Image();
           overlayImg.onload = () => {
+            // Privremeni canvas za feathering (mekane ivice)
+            const maskCanvas = document.createElement('canvas');
+            maskCanvas.width = canvas.width;
+            maskCanvas.height = canvas.height;
+            const maskCtx = maskCanvas.getContext('2d');
+
+            maskCtx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height);
+
+            // destination-in + radijalni gradijent = transparentnost prema ivicama
+            maskCtx.globalCompositeOperation = 'destination-in';
+            const gradient = maskCtx.createRadialGradient(
+              canvas.width / 2, canvas.height / 2, 0,
+              canvas.width / 2, canvas.height / 2, canvas.width / 1.8
+            );
+            gradient.addColorStop(0.55, 'rgba(0, 0, 0, 1)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            maskCtx.fillStyle = gradient;
+            maskCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Iscrtaj sa soft-light blend mode-om
             ctx.globalAlpha = overlayOpacity;
-            ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'soft-light';
+            ctx.drawImage(maskCanvas, 0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'source-over';
             ctx.globalAlpha = 1;
 
             // Download

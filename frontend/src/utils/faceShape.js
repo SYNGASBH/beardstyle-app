@@ -74,10 +74,28 @@ export function classifyFaceShape(landmarks) {
 }
 
 /**
+ * Check if WebGL is available (MediaPipe FaceMesh requires it).
+ * Without this check, machines without GPU show alert dialogs.
+ */
+function isWebGLAvailable() {
+  try {
+    const c = document.createElement('canvas');
+    return !!(c.getContext('webgl') || c.getContext('webgl2') || c.getContext('experimental-webgl'));
+  } catch (_) {
+    return false;
+  }
+}
+
+/**
  * Run FaceMesh on an HTMLImageElement and return the classified face shape.
- * Returns null on any failure (no face detected, tilted, CDN unavailable).
+ * Returns null on any failure (no face detected, tilted, CDN unavailable, no WebGL).
  */
 export async function detectFaceShape(imageElement) {
+  if (!isWebGLAvailable()) {
+    console.debug('[FaceShape] WebGL nedostupan — preskačem MediaPipe, Claude ce odrediti oblik lica.');
+    return null;
+  }
+
   await loadFaceMesh();
   if (!window.FaceMesh) return null;
 

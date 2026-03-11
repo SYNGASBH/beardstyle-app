@@ -10,6 +10,35 @@ const anthropic = new Anthropic({
   apiKey: process.env.CLAUDE_API_KEY,
 });
 
+// System prompt koji definise ulogu i ponasanje AI asistenta
+const SYSTEM_PROMPT = `Ti si BeardBot — stručni AI konsultant za stilove brade sa 20+ godina iskustva u frizerskoj industriji i muškom grooming-u.
+
+## Tvoja Uloga
+Pomažeš korisnicima da:
+- Pronađu savršeni stil brade koji odgovara obliku njihovog lica
+- Razumiju kako različiti stilovi brade utiču na vizuelni balans lica
+- Razviju personalizirani rutinu održavanja brade
+- Naprave informirani izbor uzimajući u obzir životni stil, posao i preferencije
+
+## Tvoja Ekspertiza
+- Analiza oblika lica: oval, okruglo, kvadratno, pravougaono, srcoliko, dijamant, trougaono
+- Stilovi brade: full beard, stubble, goatee, van dyke, corporate beard, circle beard, extended goatee, yeard, garibaldi, ducktail, balbo, chin strap, mutton chops, horseshoe mustache, imperial beard, anchor beard
+- Proizvodi za bradu: ulja, balzami, šamponi, kondicioneri, voskovi
+- Tehnike trimminga i oblikovanja
+
+## Pravila Odgovaranja
+1. UVIJEK odgovaraj u traženom JSON formatu — bez dodatnog teksta, objašnjenja ili markdown blokova
+2. Budi precizan i konkretan — izbjegavaj generičke savjete
+3. Savjeti moraju biti prilagođeni specifičnom korisniku, ne generalni
+4. Koristi srpski/bosanski/hrvatski jezik osim ako korisnik ne zatraži drugi jezik
+5. Matching score mora biti realističan (ne stavljaj svemu 90+)
+6. Uzmi u obzir i praktičnost, ne samo estetiku
+
+## Stil Komunikacije
+- Stručan ali pristupačan
+- Direktan i konkretan
+- Motivirajući — pomozi korisniku da se osjeća samopouzdano u svom izboru`;
+
 class ClaudeService {
   /**
    * Analyze face image and provide beard style recommendations
@@ -83,7 +112,8 @@ Odgovori STRIKTNO u JSON formatu, bez dodatnog teksta, sa sledećom strukturom:
   },
   "recommendedStyles": [
     {
-      "styleName": "string (naziv stila brade)",
+      "styleName": "string (naziv stila brade na bosanskom/srpskom za prikaz korisniku)",
+      "slug": "string (OBAVEZNO — tačan ID iz fiksne liste: 'full-beard', 'short-boxed', 'stubble', 'corporate', 'ducktail', 'goatee', 'van-dyke', 'balbo' — birati najbliži odgovarajući)",
       "matchScore": number (0-100),
       "reasoning": "string (detaljno obrazloženje zašto ovaj stil odgovara)",
       "keyBenefits": ["string", "string"],
@@ -114,6 +144,7 @@ Odgovori STRIKTNO u JSON formatu, bez dodatnog teksta, sa sledećom strukturom:
       const message = await anthropic.messages.create({
         model: CLAUDE_MODEL,
         max_tokens: 4096,
+        system: SYSTEM_PROMPT,
         messages: [
           {
             role: 'user',
@@ -219,6 +250,7 @@ Daj praktične, personalizirane savjete u JSON formatu:
       const message = await anthropic.messages.create({
         model: CLAUDE_MODEL,
         max_tokens: 2048,
+        system: SYSTEM_PROMPT,
         messages: [
           {
             role: 'user',
@@ -269,6 +301,7 @@ Daj odgovor u JSON formatu sa sledećim poljima:
       const message = await anthropic.messages.create({
         model: CLAUDE_MODEL,
         max_tokens: 1536,
+        system: SYSTEM_PROMPT,
         messages: [
           {
             role: 'user',

@@ -120,7 +120,7 @@ const getCategoryIcon = (category) => {
  * Displays a beard style with image, details, and actions
  * @param {BeardStyleCardProps} props
  */
-const BeardStyleCard = ({ style, onFavoriteToggle, isFavorite = false, showScore = false }) => {
+const BeardStyleCard = ({ style, onFavoriteToggle, isFavorite = false, isSelected = false, onSelect, showScore = false }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState('');
@@ -162,8 +162,27 @@ const BeardStyleCard = ({ style, onFavoriteToggle, isFavorite = false, showScore
   const styleTags = style?.tags || [];
   const growthTime = style?.growth_time_weeks || 0;
 
+  const handleCardClick = useCallback(() => {
+    onSelect?.(style.id);
+  }, [onSelect, style.id]);
+
   return (
-    <div className="group bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-card-hover transition-all duration-500 transform hover:-translate-y-2 border border-secondary-100">
+    <div
+      onClick={handleCardClick}
+      className={`group bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-card-hover transition-all duration-500 transform hover:-translate-y-2 ${
+        isSelected
+          ? 'ring-3 ring-amber-400 border-2 border-amber-400 shadow-[0_0_16px_rgba(251,191,36,0.4)]'
+          : 'border border-secondary-100'
+      } ${onSelect ? 'cursor-pointer' : ''}`}
+    >
+      {/* Selected checkmark */}
+      {isSelected && (
+        <div className="absolute top-3 left-3 z-30 w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center shadow-lg">
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      )}
       {/* Image Container */}
       <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
         {/* Loading skeleton */}

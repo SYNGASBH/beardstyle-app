@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { userAPI, stylesAPI } from '../services/api';
-import BeforeAfterSlider from '../components/BeforeAfterSlider';
+import { stylesAPI } from '../services/api';
 import BeardStylePreview from '../components/BeardStylePreview';
+import RealisticBeardGenerator from '../components/RealisticBeardGenerator';
 
 const AIResultsPage = () => {
   const location = useLocation();
@@ -13,37 +13,20 @@ const AIResultsPage = () => {
   const [error, setError] = useState(null);
   const [selectedStyle, setSelectedStyle] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [realisticStyle, setRealisticStyle] = useState(null); // { slug, name }
 
   const uploadData = location.state;
 
   const loadAIResults = useCallback(async (uploadId) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90000); // 90s timeout
     try {
       setLoading(true);
-      // Prvo dohvati AI analizu (čekaj dok ne bude gotova)
-      let faceShape = uploadData?.faceShape || null;
-      let aiAnalysis = uploadData?.aiAnalysis || null;
-      if (!faceShape) {
-        let retries = 0;
-        const validShapes = ['oval', 'round', 'square', 'rectangle', 'triangle', 'diamond', 'heart', 'oblong'];
-        while (retries < 20) {
-          try {
-            const analysisResponse = await userAPI.getAIAnalysis(uploadId);
-            aiAnalysis = analysisResponse.data.analysis;
-            const rawShape = aiAnalysis?.faceShape || '';
-            const isValid = validShapes.some(s => rawShape.toLowerCase().includes(s));
-            if (isValid) { faceShape = rawShape; break; }
-            if (rawShape) { faceShape = 'oval'; break; } // AI done, shape nepoznat
-          } catch (e) {}
-          retries++;
-          await new Promise(r => setTimeout(r, 2000));
-        }
-        if (!faceShape) faceShape = 'oval';
-        setAnalysis(aiAnalysis);
-      }
-      // Sad pozovi recommend s faceShape
+      // Pozovi getRecommendations s uploadId — backend će lazily pokrenuti Claude analizu
+      // i vratiti i preporuke i aiAnalysis u jednom pozivu (nema potrebe za pollingom)
       const recResponse = await stylesAPI.getRecommendations({
         uploadId,
-        faceShape,
+        faceShape: uploadData?.faceShape || 'oval',
         lifestyle: uploadData?.lifestyle || 'casual',
         maintenancePreference: uploadData?.maintenancePreference || 'medium',
       });
@@ -51,8 +34,13 @@ const AIResultsPage = () => {
       if (recResponse.data.aiAnalysis) setAnalysis(recResponse.data.aiAnalysis);
     } catch (err) {
       console.error('Failed to load AI results:', err);
-      setError('Greška pri učitavanju rezultata. Pokušajte ponovo.');
+      if (err.name === 'CanceledError' || err.name === 'AbortError' || err.code === 'ERR_CANCELED') {
+        setError('AI analiza traje predugo. Pokušajte ponovo ili nastavite sa upitnikom.');
+      } else {
+        setError('Greška pri učitavanju rezultata. Pokušajte ponovo.');
+      }
     } finally {
+      clearTimeout(timeout);
       setLoading(false);
     }
   }, [uploadData]);
@@ -90,16 +78,29 @@ const AIResultsPage = () => {
       <div className="container mx-auto px-4 py-8 text-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-600 mx-auto mb-4"></div>
         <p className="text-gray-600">Analiziram vašu sliku pomoću AI...</p>
-        <p className="text-sm text-gray-500 mt-2">Ovo može potrajati 10-20 sekundi</p>
+        <p className="text-sm text-gray-500 mt-2">Ovo može potrajati 30–60 sekundi</p>
       </div>
     );
   }
+
+  // Sigurna konverzija — sprječava "Objects are not valid as React child"
+  // Dešava se kad Claude vrati objekte umjesto stringova u array poljima
+  const safeStr = (val) => {
+    if (val === null || val === undefined) return '';
+    if (typeof val === 'string') return val;
+    if (typeof val === 'number') return String(val);
+    if (typeof val === 'object') {
+      console.warn('[AIResults] Neočekivani objekt umjesto stringa:', val);
+      return val.message || val.text || val.value || JSON.stringify(val);
+    }
+    return String(val);
+  };
 
   if (error && recommendations.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error || 'AI analiza nije dostupna. Molimo nastavite sa upitnikom.'}
+          {(typeof error === 'object' ? error?.message : error) || 'AI analiza nije dostupna. Molimo nastavite sa upitnikom.'}
         </div>
         <button
           onClick={handleContinueToQuestionnaire}
@@ -148,6 +149,17 @@ const AIResultsPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
+      {/* Realistic Generator Modal */}
+      {realisticStyle && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+          <RealisticBeardGenerator
+            userPhoto={uploadData.imageUrl}
+            style={realisticStyle}
+            onClose={() => setRealisticStyle(null)}
+          />
+        </div>
+      )}
+
       {/* Preview Modal */}
       {showPreview && selectedStyle && (
         <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4 overflow-y-auto">
@@ -178,36 +190,6 @@ const AIResultsPage = () => {
         Analizirali smo vašu sliku i kreirali personalizirane preporuke
       </p>
 
-      {/* WOW Factor: Before/After Preview with Top Recommendation */}
-      {recommendations.length > 0 && recommendations.find(r => r.aiRecommended) && (
-        <div className="mb-12">
-          <div className="text-center mb-6">
-            <h2 className="text-3xl font-bold mb-2">Pogledajte Vašu Transformaciju!</h2>
-            <p className="text-gray-600">
-              Evo kako biste izgledali sa našom #1 preporukom
-            </p>
-          </div>
-          <BeforeAfterSlider
-            beforeImage={uploadData.imageUrl}
-            afterImage={uploadData.imageUrl}
-            styleName={recommendations.find(r => r.aiRecommended)?.name || 'Recommended Style'}
-            beardStyle={styleNameToKey(recommendations.find(r => r.aiRecommended)?.name)}
-            showControls={false}
-          />
-          <div className="text-center mt-6">
-            <button
-              onClick={() => handleStylePreview(
-                recommendations.find(r => r.aiRecommended)?.id,
-                recommendations.find(r => r.aiRecommended)?.name,
-                styleNameToKey(recommendations.find(r => r.aiRecommended)?.name)
-              )}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
-            >
-              Pokušaj Ovaj Stil
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Image and Face Shape */}
       <div className="grid md:grid-cols-2 gap-8 mb-8">
@@ -284,7 +266,7 @@ const AIResultsPage = () => {
               <h3 className="font-bold text-green-700 mb-2">Naglasi:</h3>
               <ul className="space-y-1">
                 {stylingAdvice.emphasize?.map((item, idx) => (
-                  <li key={idx} className="text-sm">{item}</li>
+                  <li key={idx} className="text-sm">{safeStr(item)}</li>
                 ))}
               </ul>
             </div>
@@ -293,7 +275,7 @@ const AIResultsPage = () => {
               <h3 className="font-bold text-red-700 mb-2">Umanji:</h3>
               <ul className="space-y-1">
                 {stylingAdvice.minimize?.map((item, idx) => (
-                  <li key={idx} className="text-sm">{item}</li>
+                  <li key={idx} className="text-sm">{safeStr(item)}</li>
                 ))}
               </ul>
             </div>
@@ -330,10 +312,10 @@ const AIResultsPage = () => {
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">AI Preporučeni Stilovi</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            {recommendations.filter(r => r.aiRecommended).map((style) => (
+            {recommendations.map((style) => (
               <div
                 key={style.id}
-                className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-2 border-red-500"
+                className={`bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-2 ${style.aiRecommended ? 'border-red-500' : 'border-gray-200'}`}
               >
                 {style.image_url && (
                   <img
@@ -353,7 +335,7 @@ const AIResultsPage = () => {
                   </div>
 
                   {style.aiReasoning && (
-                    <p className="text-sm text-gray-600 mb-3">{style.aiReasoning}</p>
+                    <p className="text-sm text-gray-600 mb-3">{safeStr(style.aiReasoning)}</p>
                   )}
 
                   {style.aiKeyBenefits && (
@@ -361,18 +343,27 @@ const AIResultsPage = () => {
                       {style.aiKeyBenefits.slice(0, 2).map((benefit, idx) => (
                         <div key={idx} className="flex items-start mb-1">
                           <span className="text-green-600 mr-1">✓</span>
-                          <span className="text-gray-700">{benefit}</span>
+                          <span className="text-gray-700">{safeStr(benefit)}</span>
                         </div>
                       ))}
                     </div>
                   )}
 
-                  <button
-                    onClick={() => handleStylePreview(style.id, style.name, styleNameToKey(style.name))}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded transition-colors"
-                  >
-                    Pokušaj Ovaj Stil
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleStylePreview(style.id, style.name, styleNameToKey(style.name))}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-3 rounded transition-colors text-sm"
+                    >
+                      Pokušaj Ovaj Stil
+                    </button>
+                    <button
+                      onClick={() => setRealisticStyle({ slug: styleNameToKey(style.name), name: style.name })}
+                      className="px-3 py-2 border border-red-600 text-red-600 hover:bg-red-50 rounded transition-colors text-sm font-semibold"
+                      title="Generiši realističnu sliku"
+                    >
+                      🎨
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -405,7 +396,7 @@ const AIResultsPage = () => {
               <div className="flex flex-wrap gap-2">
                 {maintenanceGuide.recommendedProducts.map((product, idx) => (
                   <span key={idx} className="bg-white px-3 py-1 rounded-full text-sm border">
-                    {product}
+                    {safeStr(product)}
                   </span>
                 ))}
               </div>
@@ -417,7 +408,7 @@ const AIResultsPage = () => {
               <h3 className="font-bold mb-2">Tehnike Stilizovanja:</h3>
               <ul className="space-y-1">
                 {maintenanceGuide.stylingTechniques.map((technique, idx) => (
-                  <li key={idx} className="text-gray-700">• {technique}</li>
+                  <li key={idx} className="text-gray-700">• {safeStr(technique)}</li>
                 ))}
               </ul>
             </div>
@@ -429,7 +420,7 @@ const AIResultsPage = () => {
       {analysis?.additionalNotes && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
           <h3 className="font-bold mb-2">💡 Dodatne Napomene:</h3>
-          <p className="text-gray-700">{analysis.additionalNotes}</p>
+          <p className="text-gray-700">{safeStr(analysis.additionalNotes)}</p>
         </div>
       )}
 

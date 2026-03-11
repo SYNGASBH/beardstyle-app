@@ -75,6 +75,8 @@ export const userAPI = {
 
 export const stylesAPI = {
   getAll: (filters) => api.get('/styles', { params: filters }),
+  getPaginated: ({ limit = 20, offset = 0, ...filters } = {}) =>
+    api.get('/styles', { params: { limit, offset, ...filters } }),
   getPopular: (limit = 10) => api.get('/styles/popular', { params: { limit } }),
   getRecommendations: (questionnaireData) => api.post('/styles/recommend', questionnaireData),
   getById: (id) => api.get(`/styles/${id}`),
@@ -82,6 +84,13 @@ export const stylesAPI = {
   getTags: () => api.get('/styles/meta/tags'),
   getFaceTypes: () => api.get('/styles/meta/face-types'),
   visualizeBeard: (uploadId, styleId) => api.post('/styles/visualize', { uploadId, styleId }),
+
+  // Realistic inpainting via Replicate — Korak 2/3
+  // imageBase64 and maskBase64 come from the frontend (generateBeardMask.js)
+  generateRealistic: (imageBase64, maskBase64, styleSlug) =>
+    api.post('/styles/generate-realistic', { imageBase64, maskBase64, styleSlug }, {
+      timeout: 150000, // 2.5 min — Replicate cold starts can be slow
+    }),
 };
 
 // ============================================

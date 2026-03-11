@@ -66,9 +66,9 @@ module.exports = {
         'glow': '0 0 15px rgba(30, 64, 175, 0.3)',
       },
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-out',
-        'slide-up': 'slideUp 0.5s ease-out',
-        'scale-in': 'scaleIn 0.3s ease-out',
+        'fade-in': 'fadeIn 0.5s ease-out both',
+        'slide-up': 'slideUp 0.7s ease-out both',
+        'scale-in': 'scaleIn 0.3s ease-out both',
       },
       keyframes: {
         fadeIn: {

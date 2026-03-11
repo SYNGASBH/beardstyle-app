@@ -4,9 +4,10 @@ const BeardStyle = require('../models/BeardStyle');
 const User = require('../models/User');
 const ClaudeService = require('../services/claudeService');
 const DalleService = require('../services/dalleService');
+const ReplicateService = require('../services/replicateService');
 const { optionalAuth, authenticateToken, authenticateUser } = require('../middleware/auth');
 
-// Get all beard styles with optional filters
+// Get all beard styles with optional filters and pagination
 router.get('/', optionalAuth, async (req, res, next) => {
   try {
     const filters = {
@@ -14,12 +15,24 @@ router.get('/', optionalAuth, async (req, res, next) => {
       maintenanceLevel: req.query.maintenance,
       faceType: req.query.faceType,
       search: req.query.search,
+      limit: req.query.limit,
+      offset: req.query.offset,
     };
 
-    const styles = await BeardStyle.findAll(filters);
+    const [styles, total] = await Promise.all([
+      BeardStyle.findAll(filters),
+      BeardStyle.countAll(filters),
+    ]);
+
+    const limit = parseInt(req.query.limit) || total;
+    const offset = parseInt(req.query.offset) || 0;
 
     res.json({
       count: styles.length,
+      total,
+      page: limit > 0 ? Math.floor(offset / limit) + 1 : 1,
+      totalPages: limit > 0 ? Math.ceil(total / limit) : 1,
+      hasMore: offset + styles.length < total,
       styles,
     });
   } catch (error) {
@@ -115,11 +128,15 @@ router.post('/recommend', async (req, res, next) => {
     }
 
     // Merge AI recommendations with database styles
-    const mergedRecommendations = mergeRecommendations(
-      dbRecommendations,
-      aiAnalysis,
-      aiEnhancedRecommendations
-    );
+    const aiStyles = aiAnalysis?.recommended_styles
+      ? (typeof aiAnalysis.recommended_styles === 'string'
+          ? JSON.parse(aiAnalysis.recommended_styles)
+          : aiAnalysis.recommended_styles)
+      : [];
+
+    const mergedRecommendations = aiStyles.length > 0
+      ? mergeRecommendations(aiStyles, dbRecommendations)
+      : dbRecommendations;
 
     res.json({
       count: mergedRecommendations.length,
@@ -139,42 +156,64 @@ router.post('/recommend', async (req, res, next) => {
   }
 });
 
-// Helper function to merge recommendations
-function mergeRecommendations(dbStyles, aiAnalysis, aiEnhanced) {
-  const recommendations = [...dbStyles];
+// Mapping rječnik za poznate AI prijevode na bosanski (fallback)
+const styleNameMapping = {
+  'puna brada': 'full-beard',
+  'kratka geometrijska': 'short-boxed',
+  'kratka brada': 'short-boxed',
+  'trodnevna brada': 'stubble',
+  'korporativna brada': 'corporate',
+  'pačiji rep': 'ducktail',
+  'jarebica': 'goatee',
+  'van dyke': 'van-dyke',
+  'balbo': 'balbo',
+};
 
-  // If we have AI analysis, boost matching styles
-  if (aiAnalysis && aiAnalysis.recommended_styles) {
-    const aiStyles = typeof aiAnalysis.recommended_styles === 'string'
-      ? JSON.parse(aiAnalysis.recommended_styles)
-      : aiAnalysis.recommended_styles;
+// Helper function to merge AI recommendations with DB styles
+function mergeRecommendations(aiRecommendations, dbStyles) {
+  return aiRecommendations.map(aiStyle => {
+    let matchedDbStyle = null;
 
-    aiStyles.forEach(aiStyle => {
-      const matchingDb = recommendations.find(db =>
-        db.name.toLowerCase().includes(aiStyle.styleName.toLowerCase()) ||
-        aiStyle.styleName.toLowerCase().includes(db.name.toLowerCase())
+    // 1. Match po slug polju koje Claude vraća (najpouzdanije)
+    if (aiStyle.slug) {
+      matchedDbStyle = dbStyles.find(db =>
+        db.slug === aiStyle.slug ||
+        db.name.toLowerCase() === aiStyle.slug.replace(/-/g, ' ')
       );
+    }
 
-      if (matchingDb) {
-        matchingDb.aiMatchScore = aiStyle.matchScore;
-        matchingDb.aiReasoning = aiStyle.reasoning;
-        matchingDb.aiKeyBenefits = aiStyle.keyBenefits;
-        matchingDb.aiRecommended = true;
+    // 2. Fallback: prevedi bosansko ime u slug pomoću mapping rječnika
+    if (!matchedDbStyle && aiStyle.styleName) {
+      const normalizedName = aiStyle.styleName.toLowerCase().trim();
+      const mappedSlug = styleNameMapping[normalizedName];
+      if (mappedSlug) {
+        matchedDbStyle = dbStyles.find(db =>
+          db.slug === mappedSlug ||
+          db.name.toLowerCase() === mappedSlug.replace(/-/g, ' ')
+        );
       }
-    });
+    }
 
-    // Sort by AI match score if available
-    recommendations.sort((a, b) => {
-      if (a.aiMatchScore && b.aiMatchScore) {
-        return b.aiMatchScore - a.aiMatchScore;
-      }
-      if (a.aiMatchScore) return -1;
-      if (b.aiMatchScore) return 1;
-      return 0;
-    });
-  }
+    // 3. Fallback: string includes za edge case-ove
+    if (!matchedDbStyle && aiStyle.styleName) {
+      matchedDbStyle = dbStyles.find(db =>
+        db.name.toLowerCase().includes(aiStyle.styleName.toLowerCase())
+      );
+    }
 
-  return recommendations;
+    if (matchedDbStyle) {
+      return {
+        ...matchedDbStyle,
+        aiReasoning: aiStyle.reasoning,
+        aiKeyBenefits: aiStyle.keyBenefits,
+        aiMatchScore: aiStyle.matchScore,
+        aiRecommended: true,
+      };
+    }
+
+    console.warn(`[BeardStyle] Stil nije matchiran: ${aiStyle.styleName} (slug: ${aiStyle.slug})`);
+    return null;
+  }).filter(Boolean);
 }
 
 // Get single beard style by ID or slug
@@ -313,6 +352,52 @@ router.post('/visualize', async (req, res, next) => {
         error: error.message
       }
     });
+  }
+});
+
+// Generate realistic beard photo via Replicate inpainting
+// POST /api/styles/generate-realistic
+// Body: { imageBase64, maskBase64, styleSlug }
+// Auth: optional — logged-in users get the result saved to their history
+router.post('/generate-realistic', optionalAuth, async (req, res, next) => {
+  try {
+    const { imageBase64, maskBase64, styleSlug } = req.body;
+
+    // ── Validation ──────────────────────────────────────────────────────────
+    if (!imageBase64) {
+      return res.status(400).json({ error: 'imageBase64 is required' });
+    }
+    if (!maskBase64) {
+      return res.status(400).json({ error: 'maskBase64 is required — run generateBeardMask() on the frontend first' });
+    }
+    if (!styleSlug) {
+      return res.status(400).json({ error: 'styleSlug is required (e.g. "full-beard", "stubble")' });
+    }
+
+    // ── Service availability check ───────────────────────────────────────────
+    if (!ReplicateService.isAvailable() && process.env.USE_MOCK_AI !== 'true') {
+      return res.status(503).json({
+        error: 'Replicate API not configured. Add REPLICATE_API_TOKEN to .env or set USE_MOCK_AI=true for testing.',
+      });
+    }
+
+    console.log(`🎨 [/generate-realistic] styleSlug=${styleSlug}, user=${req.user?.id || 'anonymous'}`);
+
+    // ── Generate ─────────────────────────────────────────────────────────────
+    const result = await ReplicateService.generateBeardVisualization(
+      imageBase64,
+      maskBase64,
+      styleSlug,
+    );
+
+    res.json({
+      success: true,
+      ...result,
+    });
+
+  } catch (error) {
+    console.error('[/generate-realistic] Error:', error.message);
+    next(error);
   }
 });
 

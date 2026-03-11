@@ -209,14 +209,19 @@ const BeardOverlay = ({
       style={{
         transform: `translate(${position.x}%, ${position.y}%) scale(${scale})`,
         transformOrigin: 'center',
-        opacity: opacity
+        opacity: opacity,
+        // Blend mode: tekstura kože i sjenke probijaju kroz SVG bradu
+        mixBlendMode: 'soft-light',
+        // Feathering: mekani prelaz prema ivicama (nema oštrih rubova)
+        maskImage: 'radial-gradient(ellipse 88% 82% at 50% 50%, black 55%, transparent 100%)',
+        WebkitMaskImage: 'radial-gradient(ellipse 88% 82% at 50% 50%, black 55%, transparent 100%)',
       }}
     >
       <svg
         viewBox={selectedStyle.viewBox}
         className="w-full h-full"
         style={{
-          filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.3))'
+          filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.2))'
         }}
       >
         {/* No defs needed - using stroke-only rendering */}
