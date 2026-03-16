@@ -1,0 +1,6 @@
+export { ResultsScreen } from './ResultsScreen'
+export { StyleCard } from './StyleCard'
+export { StyleDetail } from './StyleDetail'
+export { BarberNote } from './BarberNote'
+export { BeardIllustration } from './BeardIllustration'
+export { FaceShapeIcon } from './FaceShapeIcon'

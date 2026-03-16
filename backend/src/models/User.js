@@ -174,6 +174,29 @@ class User {
     return result.rows[0];
   }
 
+  // Save beard analysis result (onSave from ResultsScreen)
+  static async saveBeardAnalysis(userId, { faceShape, recommendedStyleId, confidenceScore, imageUrl, rawResult }) {
+    const result = await query(
+      `INSERT INTO beard_analyses
+       (user_id, face_shape, recommended_style_id, confidence_score, image_url, raw_result)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [userId, faceShape, recommendedStyleId, confidenceScore, imageUrl, JSON.stringify(rawResult)]
+    );
+    return result.rows[0];
+  }
+
+  // Get user's saved analyses
+  static async getBeardAnalyses(userId) {
+    const result = await query(
+      `SELECT * FROM beard_analyses
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [userId]
+    );
+    return result.rows;
+  }
+
   // Get upload by ID
   static async getUploadById(uploadId) {
     const result = await query(

@@ -37,6 +37,7 @@ services:
       USE_MOCK_AI: ${USE_MOCK_AI}
       CLAUDE_API_KEY: ${CLAUDE_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}
     ports:
       - "5000:5000"
     volumes:
@@ -56,7 +57,7 @@ services:
     container_name: beard_style_frontend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - ./frontend:/app
       - /app/node_modules

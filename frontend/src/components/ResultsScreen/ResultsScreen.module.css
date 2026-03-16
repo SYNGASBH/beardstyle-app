@@ -1,0 +1,450 @@
+/* ── Layout ──────────────────────────────────── */
+.root {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #1a1a1a;
+}
+
+/* ── Header ─────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 24px;
+}
+.logo {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.5px;
+}
+.stepLabel {
+  font-size: 13px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Hero (face shape) ──────────────────────── */
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: linear-gradient(135deg, #fafafa 0%, #f4f0ec 100%);
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+.faceWrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.confidence {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+.heroInfo {
+  flex: 1;
+  min-width: 0;
+}
+.shapeLabel {
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin: 0 0 4px;
+}
+.shapeName {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  letter-spacing: -0.5px;
+}
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.featureTag {
+  font-size: 12px;
+  background: #fff;
+  border: 1px solid #e0dcd8;
+  border-radius: 100px;
+  padding: 3px 10px;
+  color: #555;
+}
+
+/* ── Tabs ───────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 20px;
+}
+.tab {
+  flex: 1;
+  padding: 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #999;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.tab:hover {
+  color: #555;
+}
+.tab.active {
+  color: #1a1a1a;
+  border-bottom-color: #1a1a1a;
+}
+
+/* ── Panel wrap ─────────────────────────────── */
+.panelWrap {
+  min-height: 320px;
+}
+
+/* ── Style cards grid ───────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+/* ── Individual card ────────────────────────── */
+.card {
+  position: relative;
+  border: 2px solid #eee;
+  border-radius: 14px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  background: #fff;
+}
+.card:hover {
+  border-color: #ccc;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+.card.selected {
+  border-color: #1a1a1a;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+.cardCheck {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cardCheck svg {
+  width: 12px;
+  height: 12px;
+  stroke: #fff;
+  stroke-width: 3;
+  fill: none;
+}
+
+.illustration {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f6f3;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.illustrationImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardBody {
+  text-align: left;
+}
+.cardName {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+.cardDesc {
+  font-size: 12px;
+  color: #777;
+  margin: 0 0 8px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cardMatch {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2d8a4e;
+  margin: 0;
+}
+
+/* ── Style detail ───────────────────────────── */
+.detail {
+  animation: fadeIn 0.2s ease;
+}
+.back {
+  font-size: 13px;
+  color: #888;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+}
+.back:hover {
+  color: #1a1a1a;
+}
+.detailHero {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.detailIllus {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: 14px;
+  background: #f8f6f3;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.detailInfo {
+  flex: 1;
+  min-width: 0;
+}
+.detailName {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.detailWhy {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+.detailTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+.tagPro {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.tagCon {
+  background: #fbe9e7;
+  color: #c62828;
+}
+
+/* ── Maintenance bars ───────────────────────── */
+.maintenance {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 20px;
+}
+.maintTitle {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #888;
+  margin: 0 0 14px;
+}
+.maintRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.maintRow:last-child {
+  margin-bottom: 0;
+}
+.maintLabel {
+  font-size: 13px;
+  width: 100px;
+  flex-shrink: 0;
+  color: #555;
+}
+.maintBarWrap {
+  flex: 1;
+  height: 6px;
+  background: #e8e4e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.maintBar {
+  height: 100%;
+  background: #1a1a1a;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.maintVal {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── Actions footer ─────────────────────────── */
+.actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 24px;
+  border-top: 1px solid #eee;
+  margin-top: 24px;
+}
+.btnPrimary {
+  flex: 1;
+  padding: 14px 20px;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btnPrimary:hover {
+  background: #333;
+}
+.btnGhost {
+  padding: 14px 20px;
+  background: none;
+  color: #555;
+  border: 1.5px solid #ddd;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btnGhost:hover {
+  border-color: #1a1a1a;
+  color: #1a1a1a;
+}
+.saveOk {
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  color: #16a34a;
+  font-weight: 500;
+}
+.saveErr {
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  color: #dc2626;
+  font-weight: 500;
+}
+
+/* ── Barber note ────────────────────────────── */
+.note {
+  background: #fffbf5;
+  border: 1px solid #f0e6d6;
+  border-radius: 14px;
+  padding: 24px;
+}
+.noteTitle {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.noteSubtitle {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 16px;
+}
+.noteContent {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #444;
+}
+.noteContent p {
+  margin: 0 0 10px;
+}
+.noteContent p:last-child {
+  margin-bottom: 0;
+}
+.noteMeta {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #f0e6d6;
+  font-size: 11px;
+  color: #aaa;
+}
+
+/* ── Animation ──────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ─────────────────────────────── */
+@media (max-width: 480px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+  }
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .card {
+    padding: 12px;
+  }
+  .detailHero {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .actions {
+    flex-direction: column;
+  }
+  .features {
+    justify-content: center;
+  }
+}

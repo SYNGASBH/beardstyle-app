@@ -67,6 +67,8 @@ export const userAPI = {
   removeFavorite: (styleId) => api.delete(`/user/favorites/${styleId}`),
   getAIAnalysis: (uploadId) => api.get(`/user/analysis/${uploadId}`),
   getMaintenanceTips: (data) => api.post('/user/maintenance-tips', data),
+  saveAnalysis: (data) => api.post('/user/save-analysis', data),
+  getSavedAnalyses: () => api.get('/user/analyses'),
 };
 
 // ============================================

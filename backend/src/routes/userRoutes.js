@@ -241,6 +241,78 @@ router.delete(
 );
 
 // ============================================
+// SAVED ANALYSIS ROUTES (onSave from ResultsScreen)
+// ============================================
+
+// Save analysis result
+router.post(
+  '/save-analysis',
+  authenticateToken,
+  authenticateUser,
+  async (req, res, next) => {
+    try {
+      const { faceShape, recommendedStyleId, confidenceScore, imageUrl, rawResult } = req.body;
+
+      if (!faceShape || !recommendedStyleId) {
+        return res.status(400).json({
+          error: 'Nedostaju obavezna polja: faceShape, recommendedStyleId',
+        });
+      }
+
+      const saved = await User.saveBeardAnalysis(req.user.userId, {
+        faceShape,
+        recommendedStyleId,
+        confidenceScore: confidenceScore ?? null,
+        imageUrl: imageUrl ?? null,
+        rawResult: rawResult ?? null,
+      });
+
+      res.status(201).json({
+        ok: true,
+        message: 'Analiza sacuvana',
+        analysis: {
+          id:                 saved.id,
+          faceShape:          saved.face_shape,
+          recommendedStyleId: saved.recommended_style_id,
+          confidenceScore:    saved.confidence_score,
+          imageUrl:           saved.image_url,
+          createdAt:          saved.created_at,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Get all saved analyses
+router.get(
+  '/analyses',
+  authenticateToken,
+  authenticateUser,
+  async (req, res, next) => {
+    try {
+      const analyses = await User.getBeardAnalyses(req.user.userId);
+
+      res.json({
+        count: analyses.length,
+        analyses: analyses.map(a => ({
+          id:                 a.id,
+          faceShape:          a.face_shape,
+          recommendedStyleId: a.recommended_style_id,
+          confidenceScore:    a.confidence_score,
+          imageUrl:           a.image_url,
+          rawResult:          a.raw_result,
+          createdAt:          a.created_at,
+        })),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// ============================================
 // AI ANALYSIS ROUTES
 // ============================================
 

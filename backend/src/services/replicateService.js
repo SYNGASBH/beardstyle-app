@@ -24,10 +24,10 @@ try { sharp = require('sharp'); } catch (_) { sharp = null; }
 
 const REPLICATE_API = 'https://api.replicate.com/v1';
 
-// Stable Diffusion Inpainting — well-tested, widely available on Replicate.
-// Model: stability-ai/stable-diffusion-inpainting
-// Version pinned for reproducibility (update if Replicate deprecates it).
-const MODEL_VERSION = '95b7223104132402a9ae91cc677285bc5eb997834bd2349fa486f53910fd68b3';
+// SDXL Inpainting — much higher quality than SD 1.5, better face preservation.
+// Model: lucataco/sdxl-inpainting
+// Alt: zsxkib/flux-dev-inpainting for best quality (but more expensive).
+const MODEL_VERSION = 'a5b13068cc81a89a4fbeefeccc774869fcb34df4dbc92c1555e0f2771d49dde7';
 
 // Polling config
 const POLL_INTERVAL_MS  = 2000;   // check every 2 s
@@ -79,11 +79,12 @@ const BEARD_PROMPTS = {
 
 const NEGATIVE_PROMPT = [
   'cartoon, anime, illustration, painting, drawing, sketch',
-  'different person, changed face, face swap',
-  'low quality, blurry, pixelated, bad anatomy',
+  'different person, changed face, face swap, different identity',
+  'low quality, blurry, pixelated, bad anatomy, deformed',
   'watermark, text, signature, logo',
-  'unrealistic skin, plastic skin, fake',
-  'cropped face, cut off head',
+  'unrealistic skin, plastic skin, fake, wax figure',
+  'cropped face, cut off head, extra fingers',
+  'patchy beard, uneven growth, floating hair, disconnected hair',
 ].join(', ');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -125,7 +126,7 @@ async function prepareImages(imageBase64, maskBase64) {
   const maskBuf = maskBase64 ? Buffer.from(stripPrefix(maskBase64), 'base64') : null;
 
   const meta = await sharp(imgBuf).metadata();
-  const TARGET = 512;
+  const TARGET = 768;
 
   const resizedImg  = await sharp(imgBuf).resize(TARGET, TARGET, { fit: 'cover' }).png().toBuffer();
   const resizedMask = maskBuf
@@ -215,10 +216,11 @@ class ReplicateService {
           prompt,
           negative_prompt: NEGATIVE_PROMPT,
           num_outputs:     1,
-          num_inference_steps: 30,
-          guidance_scale:  7.5,
-          // Preserve the unmasked area as much as possible
-          strength:        0.85,
+          steps:           30,
+          guidance_scale:  8.5,
+          scheduler:       'K_EULER',
+          // Lower strength = preserve more of the original face
+          strength:        0.65,
         },
       },
       { headers: getAuthHeaders() },

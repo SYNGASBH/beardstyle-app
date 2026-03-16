@@ -19,6 +19,7 @@ async function convertToWebp(inputPath, opts = {}) {
 
   const args = [
     inputPath,
+    "-auto-orient",
     ...(lossless
       ? ["-define", "webp:lossless=true"]
       : ["-quality", String(quality)]),
@@ -44,6 +45,7 @@ async function convertVariants(inputPath, opts = {}) {
     const outFile = `${base}-${w}w.webp`;
     await runMagick([
       inputPath,
+      "-auto-orient",
       "-resize",
       `${w}x`,
       "-quality",
