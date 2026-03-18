@@ -2,8 +2,8 @@
  * replicateService.js
  *
  * Handles realistic beard visualization via Replicate API (inpainting).
- * Uses stability-ai/stable-diffusion-inpainting to paint a beard
- * onto the user's actual photo, guided by the mask from generateBeardMask.js.
+ * Uses zsxkib/flux-dev-inpainting — FLUX.1-dev based, significantly better
+ * identity preservation and photorealism than SDXL.
  *
  * Flow:
  *   1. POST /v1/predictions  → create prediction, get ID
@@ -24,10 +24,9 @@ try { sharp = require('sharp'); } catch (_) { sharp = null; }
 
 const REPLICATE_API = 'https://api.replicate.com/v1';
 
-// SDXL Inpainting — much higher quality than SD 1.5, better face preservation.
-// Model: lucataco/sdxl-inpainting
-// Alt: zsxkib/flux-dev-inpainting for best quality (but more expensive).
-const MODEL_VERSION = 'a5b13068cc81a89a4fbeefeccc774869fcb34df4dbc92c1555e0f2771d49dde7';
+// FLUX.1-dev Inpainting — best quality, excellent identity preservation.
+// Model: zsxkib/flux-dev-inpainting (~$0.075/run, ~54s on A100 80GB)
+const MODEL_VERSION = 'ca8350ff748d56b3ebbd5a12bd3436c2214262a4ff8619de9890ecc41751a008';
 
 // Polling config
 const POLL_INTERVAL_MS  = 2000;   // check every 2 s
@@ -105,14 +104,14 @@ function toDataUrl(base64String, mimeType = 'image/png') {
 }
 
 /**
- * Resize image to 512×512 for SD inpainting.
+ * Resize image for Flux inpainting, preserving aspect ratio.
+ * Uses 'contain' + black padding so faces aren't cropped or distorted.
  * Falls back to returning the original base64 if sharp is unavailable.
  */
 async function prepareImages(imageBase64, maskBase64) {
   const stripPrefix = (b64) => b64.replace(/^data:[^;]+;base64,/, '');
 
   if (!sharp) {
-    // No sharp — pass images as-is; Replicate will resize server-side
     console.warn('[ReplicateService] sharp unavailable — sending original image size');
     return {
       resizedImageB64: stripPrefix(imageBase64),
@@ -126,11 +125,21 @@ async function prepareImages(imageBase64, maskBase64) {
   const maskBuf = maskBase64 ? Buffer.from(stripPrefix(maskBase64), 'base64') : null;
 
   const meta = await sharp(imgBuf).metadata();
-  const TARGET = 768;
+  const TARGET = 1024;
 
-  const resizedImg  = await sharp(imgBuf).resize(TARGET, TARGET, { fit: 'cover' }).png().toBuffer();
+  // contain = fit inside TARGET×TARGET, pad with black (preserves face proportions)
+  const resizedImg = await sharp(imgBuf)
+    .resize(TARGET, TARGET, { fit: 'contain', background: { r: 0, g: 0, b: 0 } })
+    .png()
+    .toBuffer();
+
+  // Mask: same resize, but pad with black (= no inpainting on padded areas)
   const resizedMask = maskBuf
-    ? await sharp(maskBuf).resize(TARGET, TARGET, { fit: 'cover' }).greyscale().png().toBuffer()
+    ? await sharp(maskBuf)
+        .resize(TARGET, TARGET, { fit: 'contain', background: { r: 0, g: 0, b: 0 } })
+        .greyscale()
+        .png()
+        .toBuffer()
     : null;
 
   return {
@@ -201,11 +210,11 @@ class ReplicateService {
     const prompt = BEARD_PROMPTS[styleSlug] || BEARD_PROMPTS['full-beard'];
     console.log(`🎨 [Replicate] Starting inpainting for style: ${styleSlug}`);
 
-    // 2. Resize images to 512×512 (SD requirement)
+    // 2. Resize images to 1024×1024 (Flux optimal resolution)
     const { resizedImageB64, resizedMaskB64, originalWidth, originalHeight } =
       await prepareImages(imageBase64, maskBase64);
 
-    // 3. Create Replicate prediction
+    // 3. Create Replicate prediction (Flux Dev Inpainting params)
     const { data: prediction } = await axios.post(
       `${REPLICATE_API}/predictions`,
       {
@@ -214,13 +223,11 @@ class ReplicateService {
           image:           toDataUrl(resizedImageB64, 'image/png'),
           mask:            toDataUrl(resizedMaskB64,  'image/png'),
           prompt,
-          negative_prompt: NEGATIVE_PROMPT,
-          num_outputs:     1,
-          steps:           30,
-          guidance_scale:  8.5,
-          scheduler:       'K_EULER',
-          // Lower strength = preserve more of the original face
-          strength:        0.65,
+          // Flux uses strength 0.85-1.0 for best inpainting results
+          strength:        0.9,
+          num_inference_steps: 28,
+          guidance_scale:  7.5,
+          output_format:   'png',
         },
       },
       { headers: getAuthHeaders() },
@@ -242,7 +249,7 @@ class ReplicateService {
       imageUrl:     `${backendUrl}/${localPath}`,
       localPath,
       styleSlug,
-      model:        'stability-ai/stable-diffusion-inpainting',
+      model:        'zsxkib/flux-dev-inpainting',
       generatedAt:  new Date().toISOString(),
     };
   }

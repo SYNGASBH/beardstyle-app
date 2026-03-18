@@ -74,15 +74,30 @@ const UploadPage = () => {
       return;
     }
 
-    setUploadedImage(file);
     setError(null);
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviewUrl(reader.result);
-      runFaceDetection(reader.result);
+    // Validate minimum image dimensions (480×480 needed for reliable face detection)
+    const dimCheck = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    dimCheck.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      if (dimCheck.naturalWidth < 480 || dimCheck.naturalHeight < 480) {
+        setError('Slika je premala. Minimalna rezolucija je 480×480 piksela.');
+        return;
+      }
+      setUploadedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+        runFaceDetection(reader.result);
+      };
+      reader.readAsDataURL(file);
     };
-    reader.readAsDataURL(file);
+    dimCheck.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      setError('Greška pri učitavanju slike.');
+    };
+    dimCheck.src = objectUrl;
   };
 
   // Handle drag and drop

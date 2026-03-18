@@ -61,8 +61,8 @@ const LEFT_MOUTH_CORNER  = 61;  // = UPPER_LIP_R_TO_L last point
  * @param {Object} [options]
  * @param {number} [options.neckPad=0.06]   - Extra downward push below chin as
  *                                            fraction of face height, to cover neck.
- * @param {number} [options.blur=8]         - Gaussian blur radius (px) to soften
- *                                            mask edges. 0 = hard edge.
+ * @param {number} [options.blur=0]          - Gaussian blur radius (px) to soften
+ *                                            mask edges. 0 = hard edge (best for Flux).
  * @param {string} [options.maskColor='white'] - Painted zone: 'white' (masked)
  *                                              or 'black' if API expects inverted.
  * @returns {string} base64-encoded PNG  ("data:image/png;base64,…")
@@ -70,7 +70,7 @@ const LEFT_MOUTH_CORNER  = 61;  // = UPPER_LIP_R_TO_L last point
 export function generateBeardMask(landmarks, imgWidth, imgHeight, options = {}) {
   const {
     neckPad    = 0.06,
-    blur       = 8,
+    blur       = 0,        // Hard edge — Flux handles blending internally
     maskColor  = 'white',  // Replicate expects white = area to paint
   } = options;
 
