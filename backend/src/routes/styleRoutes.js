@@ -6,6 +6,7 @@ const ClaudeService = require('../services/claudeService');
 const DalleService = require('../services/dalleService');
 const ReplicateService = require('../services/replicateService');
 const { optionalAuth, authenticateToken, authenticateUser } = require('../middleware/auth');
+const { stylesCache, popularCache } = require('../utils/cache');
 
 // Get all beard styles with optional filters and pagination
 router.get('/', optionalAuth, async (req, res, next) => {
@@ -19,6 +20,11 @@ router.get('/', optionalAuth, async (req, res, next) => {
       offset: req.query.offset,
     };
 
+    // Cache unfiltered requests (gallery page default)
+    const cacheKey = JSON.stringify(filters);
+    const cached = stylesCache.get(cacheKey);
+    if (cached) return res.json(cached);
+
     const [styles, total] = await Promise.all([
       BeardStyle.findAll(filters),
       BeardStyle.countAll(filters),
@@ -27,14 +33,17 @@ router.get('/', optionalAuth, async (req, res, next) => {
     const limit = parseInt(req.query.limit) || total;
     const offset = parseInt(req.query.offset) || 0;
 
-    res.json({
+    const response = {
       count: styles.length,
       total,
       page: limit > 0 ? Math.floor(offset / limit) + 1 : 1,
       totalPages: limit > 0 ? Math.ceil(total / limit) : 1,
       hasMore: offset + styles.length < total,
       styles,
-    });
+    };
+
+    stylesCache.set(cacheKey, response);
+    res.json(response);
   } catch (error) {
     next(error);
   }
@@ -44,12 +53,20 @@ router.get('/', optionalAuth, async (req, res, next) => {
 router.get('/popular', async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
+
+    const cacheKey = `popular:${limit}`;
+    const cached = popularCache.get(cacheKey);
+    if (cached) return res.json(cached);
+
     const styles = await BeardStyle.getPopular(limit);
 
-    res.json({
+    const response = {
       count: styles.length,
       styles,
-    });
+    };
+
+    popularCache.set(cacheKey, response);
+    res.json(response);
   } catch (error) {
     next(error);
   }

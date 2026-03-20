@@ -1,6 +1,7 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs').promises;
 const path = require('path');
+const sharp = require('sharp');
 
 // Model configurable via env var; fallback to last known-working ID
 const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-5-20250929';
@@ -53,19 +54,15 @@ class ClaudeService {
         return this.getMockAnalysis();
       }
 
-      // Read image file and convert to base64
-      const imageBuffer = await fs.readFile(imagePath);
-      const base64Image = imageBuffer.toString('base64');
+      // Read and compress image before sending to Claude API
+      // Resize to max 1024px and convert to JPEG to reduce payload size
+      const compressedBuffer = await sharp(imagePath)
+        .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: 80 })
+        .toBuffer();
 
-      // Determine image type from file extension
-      const ext = path.extname(imagePath).toLowerCase();
-      const imageTypeMap = {
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.png': 'image/png',
-        '.webp': 'image/webp',
-      };
-      const mediaType = imageTypeMap[ext] || 'image/jpeg';
+      const base64Image = compressedBuffer.toString('base64');
+      const mediaType = 'image/jpeg';
 
       // Create prompt for face analysis
       const prompt = `Analiziraj ovu sliku lica i daj detaljnu procjenu za stilove brade. Fokusiraj se na:

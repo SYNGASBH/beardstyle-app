@@ -42,5 +42,9 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://backend:5000"
+  "proxy": "http://backend:5000",
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2"
+  }
 }
