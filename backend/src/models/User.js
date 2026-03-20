@@ -28,11 +28,20 @@ class User {
   // Find user by ID
   static async findById(id) {
     const result = await query(
-      `SELECT id, email, first_name, last_name, phone, created_at, last_login
+      `SELECT id, email, first_name, last_name, phone,
+              subscription_tier, subscription_expires,
+              created_at, last_login
        FROM users WHERE id = $1 AND is_active = true`,
       [id]
     );
     return result.rows[0];
+  }
+
+  // Check if user has active premium subscription
+  static isPremium(user) {
+    if (!user || user.subscription_tier !== 'premium') return false;
+    if (!user.subscription_expires) return true; // lifetime
+    return new Date(user.subscription_expires) > new Date();
   }
 
   // Verify password
@@ -218,6 +227,34 @@ class User {
       [uploadId, userId]
     );
     return result.rows[0];
+  }
+
+  // ============================================
+  // LESSON PROGRESS
+  // ============================================
+
+  // Mark a lesson as completed
+  static async completeLesson(userId, courseId, lessonId) {
+    const result = await query(
+      `INSERT INTO user_lesson_progress (user_id, course_id, lesson_id)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id, lesson_id) DO NOTHING
+       RETURNING *`,
+      [userId, courseId, lessonId]
+    );
+    return result.rows[0];
+  }
+
+  // Get all completed lessons for a user
+  static async getLessonProgress(userId) {
+    const result = await query(
+      `SELECT course_id, lesson_id, completed_at
+       FROM user_lesson_progress
+       WHERE user_id = $1
+       ORDER BY completed_at ASC`,
+      [userId]
+    );
+    return result.rows;
   }
 }
 

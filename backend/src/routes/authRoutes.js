@@ -72,6 +72,7 @@ router.post(
           email: user.email,
           firstName: user.first_name,
           lastName: user.last_name,
+          subscriptionTier: 'free',
         },
         token,
       });
@@ -121,6 +122,7 @@ router.post(
           email: user.email,
           firstName: user.first_name,
           lastName: user.last_name,
+          subscriptionTier: user.subscription_tier || 'free',
         },
         token,
       });

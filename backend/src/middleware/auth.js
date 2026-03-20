@@ -58,9 +58,41 @@ const optionalAuth = (req, res, next) => {
   });
 };
 
+// Require a minimum salon subscription tier
+// Usage: requireSalonTier('premium') or requireSalonTier('enterprise')
+const requireSalonTier = (minTier) => {
+  const tierOrder = { basic: 0, premium: 1, enterprise: 2 };
+
+  return async (req, res, next) => {
+    // Lazy-load Salon model to avoid circular deps
+    const Salon = require('../models/Salon');
+    const salon = await Salon.findById(req.user.salonId);
+
+    if (!salon) {
+      return res.status(404).json({ error: 'Salon not found' });
+    }
+
+    const currentTier = salon.subscription_tier || 'basic';
+    const currentLevel = tierOrder[currentTier] ?? 0;
+    const requiredLevel = tierOrder[minTier] ?? 0;
+
+    if (currentLevel < requiredLevel) {
+      return res.status(403).json({
+        error: `Ova funkcija zahtijeva ${minTier} pretplatu. Trenutni plan: ${currentTier}.`,
+        requiredTier: minTier,
+        currentTier,
+      });
+    }
+
+    req.salonTier = currentTier;
+    next();
+  };
+};
+
 module.exports = {
   authenticateToken,
   authenticateSalon,
   authenticateUser,
   optionalAuth,
+  requireSalonTier,
 };

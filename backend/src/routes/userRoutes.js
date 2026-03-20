@@ -379,4 +379,64 @@ router.post(
   }
 );
 
+// ============================================
+// SUBSCRIPTION & PREMIUM ROUTES
+// ============================================
+
+// Get premium status
+router.get('/premium-status', authenticateToken, authenticateUser, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      isPremium: User.isPremium(user),
+      subscriptionTier: user.subscription_tier || 'free',
+      subscriptionExpires: user.subscription_expires,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ============================================
+// ACADEMY LESSON PROGRESS ROUTES
+// ============================================
+
+// Get lesson progress
+router.get('/lessons/progress', authenticateToken, authenticateUser, async (req, res, next) => {
+  try {
+    const progress = await User.getLessonProgress(req.user.userId);
+    res.json({
+      count: progress.length,
+      completedLessons: progress,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Mark lesson as completed
+router.post('/lessons/complete', authenticateToken, authenticateUser, async (req, res, next) => {
+  try {
+    const { courseId, lessonId } = req.body;
+
+    if (!courseId || !lessonId) {
+      return res.status(400).json({ error: 'courseId and lessonId are required' });
+    }
+
+    const result = await User.completeLesson(req.user.userId, courseId, lessonId);
+
+    res.status(201).json({
+      ok: true,
+      message: 'Lesson marked as completed',
+      lesson: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

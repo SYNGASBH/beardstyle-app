@@ -5,35 +5,38 @@ import useAuthStore from '../context/useAuthStore';
 
 const SalonDashboard = () => {
   const navigate = useNavigate();
-  const { user, userType } = useAuthStore();
+  const { user, accountType } = useAuthStore();
   const [stats, setStats] = useState(null);
   const [customers, setCustomers] = useState([]);
   const [activeSessions, setActiveSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showNewCustomerModal, setShowNewCustomerModal] = useState(false);
   const [newCustomer, setNewCustomer] = useState({ name: '', email: '', phone: '' });
 
   useEffect(() => {
-    if (userType !== 'salon') {
+    if (accountType !== 'salon') {
       navigate('/');
       return;
     }
     loadDashboardData();
-  }, [userType, navigate]);
+  }, [accountType, navigate]);
 
   const loadDashboardData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const [statsRes, customersRes, sessionsRes] = await Promise.all([
         salonAPI.getStats(),
         salonAPI.getCustomers(),
         salonAPI.getActiveSessions(),
       ]);
-      setStats(statsRes.data);
-      setCustomers(customersRes.data);
-      setActiveSessions(sessionsRes.data);
+      setStats(statsRes.data.stats);
+      setCustomers(customersRes.data.customers || []);
+      setActiveSessions(sessionsRes.data.sessions || []);
     } catch (err) {
       console.error('Error loading dashboard data:', err);
+      setError('Greska pri ucitavanju podataka. Pokusajte ponovo.');
     } finally {
       setLoading(false);
     }
@@ -42,23 +45,27 @@ const SalonDashboard = () => {
   const handleCreateCustomer = async (e) => {
     e.preventDefault();
     try {
-      await salonAPI.createCustomer(newCustomer);
+      await salonAPI.createCustomer({
+        customerName: newCustomer.name,
+        customerEmail: newCustomer.email,
+        customerPhone: newCustomer.phone,
+      });
       setShowNewCustomerModal(false);
       setNewCustomer({ name: '', email: '', phone: '' });
       loadDashboardData();
     } catch (err) {
       console.error('Error creating customer:', err);
-      alert('Greška pri kreiranju klijenta');
+      alert('Greska pri kreiranju klijenta');
     }
   };
 
   const handleStartSession = async (customerId) => {
     try {
       const response = await salonAPI.createSession(customerId, null);
-      navigate(`/salon/session/${response.data.sessionId}`);
+      navigate(`/salon/session/${response.data.session.sessionCode}`);
     } catch (err) {
       console.error('Error starting session:', err);
-      alert('Greška pri pokretanju sesije');
+      alert('Greska pri pokretanju sesije');
     }
   };
 
@@ -66,7 +73,24 @@ const SalonDashboard = () => {
     return (
       <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Učitavanje...</h2>
+          <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-gray-500">Ucitavanje...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={loadDashboardData}
+            className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Pokusaj ponovo
+          </button>
         </div>
       </div>
     );
@@ -78,7 +102,14 @@ const SalonDashboard = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Salon Dashboard</h1>
-          <p className="text-gray-600">Dobrodošli nazad, {user?.name}</p>
+          <p className="text-gray-600">
+            Dobrodosli nazad, {user?.salonName || user?.email}
+            {user?.subscriptionTier && (
+              <span className="ml-2 px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 rounded-full uppercase">
+                {user.subscriptionTier}
+              </span>
+            )}
+          </p>
         </div>
 
         {/* Stats */}
@@ -86,19 +117,19 @@ const SalonDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white p-6 rounded-xl shadow-lg">
               <div className="text-gray-600 text-sm mb-1">Ukupno klijenata</div>
-              <div className="text-3xl font-bold text-gray-900">{stats.totalCustomers || 0}</div>
+              <div className="text-3xl font-bold text-gray-900">{stats.total_customers || 0}</div>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg">
               <div className="text-gray-600 text-sm mb-1">Aktivne sesije</div>
-              <div className="text-3xl font-bold text-red-600">{stats.activeSessions || 0}</div>
+              <div className="text-3xl font-bold text-red-600">{stats.active_sessions || 0}</div>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="text-gray-600 text-sm mb-1">Ukupno sesija</div>
-              <div className="text-3xl font-bold text-gray-900">{stats.totalSessions || 0}</div>
+              <div className="text-gray-600 text-sm mb-1">Zavrsene sesije</div>
+              <div className="text-3xl font-bold text-gray-900">{stats.completed_sessions || 0}</div>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg">
               <div className="text-gray-600 text-sm mb-1">Ovaj mjesec</div>
-              <div className="text-3xl font-bold text-green-600">{stats.sessionsThisMonth || 0}</div>
+              <div className="text-3xl font-bold text-green-600">{stats.sessions_last_month || 0}</div>
             </div>
           </div>
         )}
@@ -109,7 +140,7 @@ const SalonDashboard = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Aktivne sesije</h2>
             {activeSessions.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                <div className="text-4xl mb-2">💈</div>
+                <div className="text-4xl mb-2">&#x1F488;</div>
                 <p>Nema aktivnih sesija</p>
               </div>
             ) : (
@@ -120,14 +151,14 @@ const SalonDashboard = () => {
                     className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-red-300 transition-all"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <div className="font-semibold text-gray-900">{session.customerName}</div>
-                      <div className="text-sm text-gray-600">{session.sessionCode}</div>
+                      <div className="font-semibold text-gray-900">{session.customer_name}</div>
+                      <div className="text-sm text-gray-600 font-mono">{session.session_code}</div>
                     </div>
                     <div className="text-sm text-gray-600 mb-3">
-                      Započeto: {new Date(session.createdAt).toLocaleString('sr-RS')}
+                      Zapoceto: {new Date(session.started_at).toLocaleString('sr-RS')}
                     </div>
                     <button
-                      onClick={() => navigate(`/salon/session/${session.id}`)}
+                      onClick={() => navigate(`/salon/session/${session.session_code}`)}
                       className="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all"
                     >
                       Nastavi sesiju
@@ -152,7 +183,7 @@ const SalonDashboard = () => {
 
             {customers.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                <div className="text-4xl mb-2">👥</div>
+                <div className="text-4xl mb-2">&#x1F465;</div>
                 <p>Nema registrovanih klijenata</p>
               </div>
             ) : (
@@ -164,14 +195,13 @@ const SalonDashboard = () => {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="font-semibold text-gray-900 mb-1">{customer.name}</div>
-                        <div className="text-sm text-gray-600">{customer.email}</div>
-                        {customer.phone && (
-                          <div className="text-sm text-gray-600">{customer.phone}</div>
+                        <div className="font-semibold text-gray-900 mb-1">{customer.customer_name}</div>
+                        {customer.customer_email && (
+                          <div className="text-sm text-gray-600">{customer.customer_email}</div>
                         )}
-                        <div className="text-xs text-gray-500 mt-1">
-                          Sesija: {customer.totalSessions || 0}
-                        </div>
+                        {customer.customer_phone && (
+                          <div className="text-sm text-gray-600">{customer.customer_phone}</div>
+                        )}
                       </div>
                       <button
                         onClick={() => handleStartSession(customer.id)}
@@ -195,7 +225,7 @@ const SalonDashboard = () => {
               onClick={() => setShowNewCustomerModal(true)}
               className="p-4 bg-white/10 hover:bg-white/20 rounded-lg text-left transition-all"
             >
-              <div className="text-3xl mb-2">👤</div>
+              <div className="text-3xl mb-2">&#x1F464;</div>
               <div className="font-semibold">Dodaj novog klijenta</div>
               <div className="text-sm opacity-90">Kreiraj profil za novog klijenta</div>
             </button>
@@ -203,7 +233,7 @@ const SalonDashboard = () => {
               onClick={() => navigate('/upload')}
               className="p-4 bg-white/10 hover:bg-white/20 rounded-lg text-left transition-all"
             >
-              <div className="text-3xl mb-2">📸</div>
+              <div className="text-3xl mb-2">&#x1F4F8;</div>
               <div className="font-semibold">Upload slike klijenta</div>
               <div className="text-sm opacity-90">Isprobajte stilove na klijentu</div>
             </button>
@@ -211,9 +241,9 @@ const SalonDashboard = () => {
               onClick={() => navigate('/gallery')}
               className="p-4 bg-white/10 hover:bg-white/20 rounded-lg text-left transition-all"
             >
-              <div className="text-3xl mb-2">🎨</div>
+              <div className="text-3xl mb-2">&#x1F3A8;</div>
               <div className="font-semibold">Pregledaj galeriju</div>
-              <div className="text-sm opacity-90">Istražite sve stilove brade</div>
+              <div className="text-sm opacity-90">Istrazite sve stilove brade</div>
             </button>
           </div>
         </div>
@@ -268,7 +298,7 @@ const SalonDashboard = () => {
                   onClick={() => setShowNewCustomerModal(false)}
                   className="flex-1 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-all"
                 >
-                  Otkaži
+                  Otkazi
                 </button>
                 <button
                   type="submit"

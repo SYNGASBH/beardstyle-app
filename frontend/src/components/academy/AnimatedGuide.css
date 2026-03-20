@@ -1,0 +1,261 @@
+/* ─────────────────────────────────────────────
+   AnimatedGuide.css
+   ───────────────────────────────────────────── */
+
+.ag-root {
+  background: var(--color-background-primary, #fff);
+  border: 0.5px solid var(--color-border-tertiary, #e5e5e5);
+  border-radius: 16px;
+  overflow: hidden;
+  font-family: var(--font-sans, system-ui);
+}
+
+/* Header */
+.ag-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 0.5px solid var(--color-border-tertiary, #e5e5e5);
+}
+.ag-header-left { flex: 1; }
+.ag-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-primary, #111);
+  margin: 0 0 2px;
+}
+.ag-subtitle {
+  font-size: 12px;
+  color: var(--color-text-secondary, #666);
+  margin: 0;
+}
+.ag-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.ag-difficulty {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.ag-diff-easy   { background: #E1F5EE; color: #085041; }
+.ag-diff-medium { background: #FAEEDA; color: #633806; }
+.ag-diff-hard   { background: #FBEAF0; color: #993556; }
+.ag-duration {
+  font-size: 11px;
+  color: var(--color-text-secondary, #666);
+}
+
+/* Tools */
+.ag-tools {
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px;
+  border-bottom: 0.5px solid var(--color-border-tertiary, #e5e5e5);
+  flex-wrap: wrap;
+}
+.ag-tool-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--color-text-secondary, #666);
+  background: var(--color-background-secondary, #f5f5f5);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+/* Animation stage */
+.ag-stage {
+  background: #1a1a1a;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  min-height: 200px;
+}
+.ag-face-svg {
+  width: 140px;
+  height: 140px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.ag-face-animated {
+  animation: ag-step-transition 0.4s ease;
+}
+@keyframes ag-step-transition {
+  0%   { opacity: 0.4; transform: scale(0.97); }
+  100% { opacity: 1;   transform: scale(1); }
+}
+
+/* Step overlay */
+.ag-step-overlay {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ag-step-counter {
+  font-size: 10px;
+  color: rgba(255,255,255,0.45);
+}
+.ag-step-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+}
+
+/* Playback controls */
+.ag-controls {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.ag-ctrl-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.ag-ctrl-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+}
+.ag-ctrl-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.ag-ctrl-play {
+  width: 36px;
+  height: 36px;
+  background: rgba(239,159,39,0.15);
+  border-color: rgba(239,159,39,0.4);
+  color: #EF9F27;
+}
+.ag-ctrl-play:hover, .ag-ctrl-play.ag-playing {
+  background: rgba(239,159,39,0.25);
+  color: #EF9F27;
+}
+
+/* Step dots */
+.ag-dots {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+}
+.ag-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, transform 0.2s;
+}
+.ag-dot:hover          { background: rgba(255,255,255,0.4); }
+.ag-dot-active         { background: #EF9F27; transform: scale(1.3); }
+.ag-dot-done           { background: #1D9E75; }
+
+/* Instruction */
+.ag-instruction {
+  padding: 14px 16px;
+  border-bottom: 0.5px solid var(--color-border-tertiary, #e5e5e5);
+}
+.ag-instruction-enter {
+  animation: ag-fade-in 0.3s ease;
+}
+@keyframes ag-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ag-instruction-text {
+  font-size: 13px;
+  color: var(--color-text-primary, #111);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.ag-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  background: #FAEEDA;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #633806;
+  line-height: 1.5;
+}
+.ag-tip-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Footer */
+.ag-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+}
+.ag-progress-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ag-progress-bar {
+  height: 3px;
+  background: var(--color-background-secondary, #f0f0f0);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.ag-progress-fill {
+  height: 100%;
+  background: #1D9E75;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+.ag-progress-label {
+  font-size: 10px;
+  color: var(--color-text-secondary, #666);
+}
+.ag-mark-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 0.5px solid var(--color-border-secondary, #ddd);
+  background: transparent;
+  color: var(--color-text-secondary, #666);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.ag-mark-btn:hover   { background: var(--color-background-secondary, #f5f5f5); }
+.ag-mark-btn.ag-mark-done {
+  background: #1D9E75;
+  border-color: #1D9E75;
+  color: #fff;
+}
