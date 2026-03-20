@@ -9,7 +9,9 @@ node_modules/
 .env.*.local
 backend/.env
 frontend/.env
-!-.env.example
+!.env.example
+!backend/.env.example
+!frontend/.env.example
 
 # Build outputs
 build/
@@ -77,5 +79,5 @@ secrets/
 *.sql.backup
 *.dump
 nul
-.claude/settings.local.json
-.claude/settings.local.json
+# Claude Code
+.claude/

@@ -6,6 +6,10 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+// Validate environment variables before anything else
+const validateEnv = require('./config/validateEnv');
+validateEnv();
+
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
