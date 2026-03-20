@@ -9,7 +9,7 @@ function CheckIcon() {
   )
 }
 
-export function StyleCard({ style, selected, onSelect, onDetail }) {
+export function StyleCard({ style, selected, onSelect, onDetail, onRealistic }) {
   return (
     <div
       className={`${styles.card} ${selected ? styles.selected : ''}`}
@@ -37,6 +37,15 @@ export function StyleCard({ style, selected, onSelect, onDetail }) {
         <p className={styles.cardName}>{style.name}</p>
         <p className={styles.cardDesc}>{style.desc}</p>
         <p className={styles.cardMatch}>{style.matchLabel}</p>
+        {onRealistic && (
+          <button
+            className={styles.btnRealistic}
+            onClick={(e) => { e.stopPropagation(); onRealistic(style); }}
+            title="Generiši realističnu sliku"
+          >
+            🎨 Vizualizacija
+          </button>
+        )}
       </div>
     </div>
   )

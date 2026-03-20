@@ -232,4 +232,5 @@ function isAdjacentLength(a: string, b: string): boolean {
   return diff === 1;
 }
 
-export default { classifyBeardStyle, quickClassify, getDifferentiatingQuestion };
+const beardClassifier = { classifyBeardStyle, quickClassify, getDifferentiatingQuestion };
+export default beardClassifier;

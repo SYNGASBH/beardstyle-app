@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react'
-import { BeardIllustration } from './BeardIllustration'
 import { FaceShapeIcon } from './FaceShapeIcon'
 import { StyleCard } from './StyleCard'
 import { StyleDetail } from './StyleDetail'
@@ -19,7 +18,7 @@ const SHAPE_NAMES_BS = {
   triangle:  'Trokutno',
 }
 
-export function ResultsScreen({ result, imageUrl, onSave, onShare, onReset }) {
+export function ResultsScreen({ result, imageUrl, onSave, onShare, onReset, onRealistic }) {
   const [tab, setTab]               = useState('stilovi')
   const [selectedId, setSelectedId] = useState(
     result?.beardStyles?.[0]?.id ?? null
@@ -120,6 +119,7 @@ export function ResultsScreen({ result, imageUrl, onSave, onShare, onReset }) {
                 selected={style.id === selectedId}
                 onSelect={() => handleSelect(style.id)}
                 onDetail={() => { handleSelect(style.id); setTab('detalji') }}
+                onRealistic={onRealistic}
               />
             ))}
           </div>
@@ -129,6 +129,7 @@ export function ResultsScreen({ result, imageUrl, onSave, onShare, onReset }) {
           <StyleDetail
             style={selectedStyle}
             onBack={() => setTab('stilovi')}
+            onRealistic={onRealistic}
           />
         )}
 

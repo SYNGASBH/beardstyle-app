@@ -27,15 +27,18 @@ const PORT = process.env.PORT || 5000;
 // MIDDLEWARE
 // ============================================
 
-// Security headers
-app.use(helmet());
-
-// CORS configuration
+// CORS configuration (must be before helmet so preflight requests work)
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
     ? process.env.FRONTEND_URL
     : ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true,
+}));
+
+// Security headers — disable policies that conflict with CORS
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  crossOriginOpenerPolicy: false,
 }));
 
 // Body parsing

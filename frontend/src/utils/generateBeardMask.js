@@ -44,10 +44,9 @@ const JAWLINE = [
 const UPPER_LIP_R_TO_L = [291, 409, 270, 269, 267, 0, 37, 39, 40, 185, 61];
 
 // Anchor indices for the straight-line cheek connectors
-const RIGHT_CHEEKBONE = 454;  // = JAWLINE last point
-const LEFT_CHEEKBONE  = 234;  // = JAWLINE first point
+// RIGHT/LEFT_CHEEKBONE mirror JAWLINE endpoints; MOUTH_CORNER mirrors UPPER_LIP endpoints.
+// Kept as named constants for readability — only RIGHT_MOUTH_CORNER is currently used.
 const RIGHT_MOUTH_CORNER = 291; // = UPPER_LIP_R_TO_L first point
-const LEFT_MOUTH_CORNER  = 61;  // = UPPER_LIP_R_TO_L last point
 
 // ─── Public API ────────────────────────────────────────────────────────────
 

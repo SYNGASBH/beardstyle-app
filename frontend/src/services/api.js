@@ -30,8 +30,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid
+    const status = error.response?.status;
+    if (status === 401 || (status === 403 && error.response?.data?.error === 'Invalid token')) {
+      // Token expired, invalid, or signed with old secret — force re-login
       useAuthStore.getState().logout();
       window.location.href = '/login';
     }

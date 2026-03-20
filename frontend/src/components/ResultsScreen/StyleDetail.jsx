@@ -1,7 +1,7 @@
 import { BeardIllustration } from './BeardIllustration'
 import styles from './ResultsScreen.module.css'
 
-export function StyleDetail({ style, onBack }) {
+export function StyleDetail({ style, onBack, onRealistic }) {
   return (
     <div className={styles.detail}>
       <button className={styles.back} onClick={onBack}>&larr; Nazad na stilove</button>
@@ -28,6 +28,15 @@ export function StyleDetail({ style, onBack }) {
           </div>
         </div>
       </div>
+
+      {onRealistic && (
+        <button
+          className={styles.btnRealistic}
+          onClick={() => onRealistic(style)}
+        >
+          🎨 Generiši realističnu vizualizaciju
+        </button>
+      )}
 
       {style.maintenance && (
         <div className={styles.maintenance}>

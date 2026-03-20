@@ -51,7 +51,7 @@ const TestOverlayPage = () => {
   // Use existing uploaded image
   const useExistingImage = () => {
     // Latest upload from backend
-    setTestImage('http://localhost:5000/uploads/user-3-1767894711525-300722842.jpg');
+    setTestImage('/uploads/user-3-1767894711525-300722842.jpg');
     setShowPreview(false);
   };
 

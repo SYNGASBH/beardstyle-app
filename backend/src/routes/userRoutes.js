@@ -109,7 +109,7 @@ router.post(
         upload: {
           id: uploadRecord.id,
           filePath: uploadRecord.file_path,
-          fileUrl: `${req.protocol}://${req.get('host')}/uploads/${largestVariant.filename}`,
+          fileUrl: `/uploads/${largestVariant.filename}`,
         },
         variants,
         aiAnalysis: null,

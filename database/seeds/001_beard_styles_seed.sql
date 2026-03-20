@@ -86,7 +86,7 @@ VALUES (
     'corporate',
     0,
     ARRAY[1, 2, 3, 4, 5, 6, 7],
-    '/assets/styles/clean-shaven.jpg',
+    '/assets/sketches/clean-shaven.webp',
     90,
     'Brijanje svakih 1-2 dana. Koristi kvalitetnu pjenu i nakon brijanja losion.'
 );
@@ -101,7 +101,7 @@ VALUES (
     'casual',
     0,
     ARRAY[1, 2, 3, 4, 5],
-    '/assets/styles/stubble.jpg',
+    '/assets/sketches/stubble-3day.webp',
     95,
     'Održavaj dužinu sa trimerom na 3-5mm. Definiši linije vrata i obraza.'
 );
@@ -116,7 +116,7 @@ VALUES (
     'corporate',
     3,
     ARRAY[1, 3, 4],
-    '/assets/styles/short-boxed.jpg',
+    '/assets/sketches/short-boxed-beard.webp',
     88,
     'Trimuj na 6-12mm. Oštri uglovi na obrazima. Redovno održavanje linija.'
 );
@@ -131,7 +131,7 @@ VALUES (
     'casual',
     8,
     ARRAY[1, 2, 4, 7],
-    '/assets/styles/full-beard.jpg',
+    '/assets/sketches/full-beard.webp',
     92,
     'Redovno četkaj i koristi ulje za bradu. Trimuj krajeve mjesečno.'
 );
@@ -146,7 +146,7 @@ VALUES (
     'artistic',
     3,
     ARRAY[1, 2, 5, 6],
-    '/assets/styles/goatee.jpg',
+    '/assets/sketches/goatee.webp',
     75,
     'Precizno održavanje ivica. Obrij obraze i vrat čisto.'
 );
@@ -161,7 +161,7 @@ VALUES (
     'artistic',
     4,
     ARRAY[1, 4, 5],
-    '/assets/styles/van-dyke.jpg',
+    '/assets/sketches/van-dyke.webp',
     70,
     'Zahtijeva preciznost. Mustaće i goatee odvojeni. Dnevno održavanje.'
 );
@@ -176,7 +176,7 @@ VALUES (
     'modern',
     4,
     ARRAY[1, 3, 4],
-    '/assets/styles/balbo.jpg',
+    '/assets/sketches/balbo.webp',
     68,
     'Oštri uglovi. Mustaće odvojene od brade. Precizno brijanje.'
 );
@@ -191,7 +191,7 @@ VALUES (
     'modern',
     3,
     ARRAY[1, 2, 3, 5],
-    '/assets/styles/circle-beard.jpg',
+    '/assets/sketches/circle-beard.webp',
     85,
     'Održavaj kružni oblik. Obrij obraze. Trimuj na jednu dužinu.'
 );
@@ -206,7 +206,7 @@ VALUES (
     'rugged',
     10,
     ARRAY[1, 3, 4, 7],
-    '/assets/styles/ducktail.jpg',
+    '/assets/sketches/ducktail.webp',
     72,
     'Pusti da raste duže na bradi. Oblikuj špic. Koristi balzam.'
 );
@@ -221,7 +221,7 @@ VALUES (
     'rugged',
     12,
     ARRAY[1, 3, 4],
-    '/assets/styles/garibaldi.jpg',
+    '/assets/sketches/garibaldi.webp',
     65,
     'Minimalno trimovanje. Prirodan rast. Zaoblji dno na 15-20cm.'
 );
@@ -236,7 +236,7 @@ VALUES (
     'artistic',
     6,
     ARRAY[3, 4],
-    '/assets/styles/mutton-chops.jpg',
+    '/assets/sketches/mutton-chops.webp',
     55,
     'Obrij bradu čisto. Pusti zaliske da rastu. Oblikuj ivice.'
 );
@@ -251,7 +251,7 @@ VALUES (
     'artistic',
     5,
     ARRAY[1, 4, 5],
-    '/assets/styles/anchor-beard.jpg',
+    '/assets/sketches/anchor-beard.webp',
     62,
     'Precizno održavanje linija. Tanka linija duž vilice. Soul patch ispod usana.'
 );
@@ -266,7 +266,7 @@ VALUES (
     'modern',
     3,
     ARRAY[1, 2, 5],
-    '/assets/styles/chin-strap.jpg',
+    '/assets/sketches/chin-strap.webp',
     58,
     'Održavaj tanku liniju (3-5mm). Obrij obraze i mustaće. Precizne ivice.'
 );
@@ -281,7 +281,7 @@ VALUES (
     'trendy',
     4,
     ARRAY[1, 3, 4],
-    '/assets/styles/beardstache.jpg',
+    '/assets/sketches/beardstache.webp',
     78,
     'Duže mustaće (10-15mm), kraća brada (3-5mm). Koristi vosak za mustaće.'
 );
@@ -296,7 +296,7 @@ VALUES (
     'corporate',
     4,
     ARRAY[1, 3, 4],
-    '/assets/styles/corporate-beard.jpg',
+    '/assets/sketches/corporate-beard.webp',
     87,
     'Trimuj na 6-9mm. Oštri uglovi. Dnevno četkanje. Koristi ulje za sjaj.'
 );

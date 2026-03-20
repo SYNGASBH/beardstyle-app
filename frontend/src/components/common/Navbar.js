@@ -30,6 +30,7 @@ const Navbar = () => {
     { path: '/upload', label: 'Pronađi Stil', icon: '📸' },
     { path: '/questionnaire', label: 'Upitnik', icon: '📋' },
     { path: '/ar-tryon', label: 'AR Try-On', icon: '🪞' },
+    { path: '/akademija', label: 'Akademija', icon: '📖' },
   ];
 
   return (

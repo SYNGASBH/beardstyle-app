@@ -10,15 +10,24 @@ import React, { useState } from 'react';
 
 // Styles that have real Midjourney-generated WebP images
 const AVAILABLE_SKETCHES = {
-  'full-beard': '/assets/sketches/full-beard.webp',
-  'ducktail': '/assets/sketches/ducktail.webp',
-  'stubble-3day': '/assets/sketches/stubble-3day.webp',
-  'stubble': '/assets/sketches/stubble-3day.webp', // alias for stubble
-  'van-dyke': '/assets/sketches/van-dyke.webp',
-  // Add more as they are generated:
-  // 'goatee': '/assets/sketches/goatee.webp',
-  // 'balbo': '/assets/sketches/balbo.webp',
-  // etc.
+  'full-beard':        '/assets/sketches/full-beard.webp',
+  'ducktail':          '/assets/sketches/ducktail.webp',
+  'stubble-3day':      '/assets/sketches/stubble-3day.webp',
+  'stubble':           '/assets/sketches/stubble.webp',
+  'van-dyke':          '/assets/sketches/van-dyke.webp',
+  'goatee':            '/assets/sketches/goatee.webp',
+  'balbo':             '/assets/sketches/balbo.webp',
+  'circle-beard':      '/assets/sketches/circle-beard.webp',
+  'corporate-beard':   '/assets/sketches/corporate-beard.webp',
+  'short-boxed-beard': '/assets/sketches/short-boxed-beard.webp',
+  'garibaldi':         '/assets/sketches/garibaldi.webp',
+  'mutton-chops':      '/assets/sketches/mutton-chops.webp',
+  'anchor-beard':      '/assets/sketches/anchor-beard.webp',
+  'chin-strap':        '/assets/sketches/chin-strap.webp',
+  'beardstache':       '/assets/sketches/beardstache.webp',
+  'handlebar':         '/assets/sketches/handlebar.webp',
+  'clean-shaven':      '/assets/sketches/clean-shaven.webp',
+  'heavy-stubble':     '/assets/sketches/heavy-stubble.webp',
 };
 
 // SVG fallback paths for styles without images

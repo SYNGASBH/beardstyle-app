@@ -29,6 +29,7 @@ const STYLE_SLUG_MAP = {
   'full-beard': 'full-beard',
   'stubble': 'stubble',
   'stubble-3-day': 'stubble',
+  'stubble-3day': 'stubble-3day',
   'goatee': 'goatee',
   'corporate-beard': 'corporate-beard',
   'corporate': 'corporate-beard',
@@ -46,6 +47,19 @@ const STYLE_SLUG_MAP = {
   'short-boxed-beard': 'short-boxed-beard',
   'short-boxed': 'short-boxed-beard',
   'handlebar': 'handlebar',
+  // Bosnian slug mappings
+  'kratka-brada': 'short-boxed-beard',
+  'trodnevna-brada': 'stubble-3day',
+  'puna-brada': 'full-beard',
+  'kozja-bradica': 'goatee',
+  'prosirana-kozja': 'circle-beard',
+  'kruzna-brada': 'circle-beard',
+  'sidro': 'anchor-beard',
+  'korporativna-brada': 'corporate-beard',
+  'zalisci-brkovi': 'mutton-chops',
+  'bandholz': 'full-beard',
+  'verdi': 'garibaldi',
+  'francuska-vilica': 'ducktail',
 };
 
 const STYLE_IMAGE_MAP = {

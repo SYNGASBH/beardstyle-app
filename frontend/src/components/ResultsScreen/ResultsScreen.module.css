@@ -366,6 +366,24 @@
   border-color: #1a1a1a;
   color: #1a1a1a;
 }
+.btnRealistic {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btnRealistic:hover {
+  background: #b91c1c;
+}
 .saveOk {
   display: block;
   text-align: center;

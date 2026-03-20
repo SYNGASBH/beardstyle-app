@@ -16,17 +16,15 @@ function validateEnv() {
   const warnings = [];
 
   // --- Required variables ---
-  const required = [
-    'JWT_SECRET',
-    'POSTGRES_USER',
-    'POSTGRES_PASSWORD',
-    'POSTGRES_DB',
-  ];
+  if (!process.env.JWT_SECRET) {
+    errors.push('Missing required env variable: JWT_SECRET');
+  }
 
-  for (const key of required) {
-    if (!process.env[key]) {
-      errors.push(`Missing required env variable: ${key}`);
-    }
+  // Database: accept either DATABASE_URL or individual POSTGRES_* vars
+  const hasDbUrl = !!process.env.DATABASE_URL;
+  const hasDbParts = process.env.POSTGRES_USER && process.env.POSTGRES_PASSWORD && process.env.POSTGRES_DB;
+  if (!hasDbUrl && !hasDbParts) {
+    errors.push('Missing database config: set DATABASE_URL or POSTGRES_USER + POSTGRES_PASSWORD + POSTGRES_DB');
   }
 
   // --- JWT Secret strength check ---
