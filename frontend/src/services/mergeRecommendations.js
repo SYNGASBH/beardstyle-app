@@ -12,20 +12,23 @@ const beardStylesById = Object.fromEntries(
 // Mapiranje Claude slug-ova na beardStyles id-ove
 // Claude vraca slug poput 'full-beard', a beardStyles koristi 'puna-brada'
 const SLUG_TO_BEARD_ID = {
-  'full-beard':      'puna-brada',
-  'short-boxed':     'kratka-brada',
-  'stubble':         'trodnevna-brada',
-  'corporate':       'korporativna-brada',
-  'ducktail':        'ducktail',
-  'goatee':          'kozja-bradica',
-  'van-dyke':        'van-dyke',
-  'balbo':           'balbo',
-  'circle-beard':    'kruzna-brada',
-  'garibaldi':       'garibaldi',
-  'mutton-chops':    'zalisci-brkovi',
-  'anchor-beard':    'sidro',
-  'chin-strap':      'sidro',         // closest match
-  'beardstache':     'verdi',         // closest match
+  'full-beard':       'puna-brada',
+  'short-boxed':      'kratka-brada',
+  'short-boxed-beard':'kratka-brada',
+  'stubble':          'trodnevna-brada',
+  'stubble-3day':     'trodnevna-brada',
+  'corporate':        'korporativna-brada',
+  'corporate-beard':  'korporativna-brada',
+  'ducktail':         'ducktail',
+  'goatee':           'kozja-bradica',
+  'van-dyke':         'van-dyke',
+  'balbo':            'balbo',
+  'circle-beard':     'kruzna-brada',
+  'garibaldi':        'garibaldi',
+  'mutton-chops':     'zalisci-brkovi',
+  'anchor-beard':     'sidro',
+  'chin-strap':       'sidro',
+  'beardstache':      'verdi',
 }
 
 // Mapiranje Claude outputa -> kljucevi face shape
@@ -52,6 +55,19 @@ const SHAPE_ALIASES = {
   triangle:     'triangle',
   trokutno:     'triangle',
   trougaono:    'triangle',
+}
+
+/**
+ * Normalize confidence to 0–1 range.
+ * Handles: 88, "88.00", 0.88, null
+ */
+function normalizeConfidence(aiData) {
+  const raw = aiData.faceShapeConfidence ?? aiData.confidence ?? null
+  if (raw == null) return null
+  const num = Number(raw)
+  if (isNaN(num)) return null
+  // If > 1, it's a percentage (e.g. 88) — convert to 0–1
+  return num > 1 ? num / 100 : num
 }
 
 function extractJson(text) {
@@ -175,9 +191,7 @@ export function mergeRecommendations(claudeRawText) {
     aiAnalysis: {
       faceShape:       resolvedKey,
       rawShape:        rawShape,
-      confidence:      aiData.faceShapeConfidence != null
-                         ? aiData.faceShapeConfidence / 100
-                         : aiData.confidence ?? null,
+      confidence:      normalizeConfidence(aiData),
       features:        features,
       characteristics: aiData.facialCharacteristics || null,
       stylingAdvice:   aiData.stylingAdvice || null,

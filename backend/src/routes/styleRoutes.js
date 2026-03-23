@@ -151,8 +151,20 @@ router.post('/recommend', async (req, res, next) => {
           : aiAnalysis.recommended_styles)
       : [];
 
+    // Fetch ALL styles for matching (not just filtered ones)
+    // so AI-recommended styles like Van Dyke don't get lost
+    let allDbStyles = dbRecommendations;
+    if (aiStyles.length > 0) {
+      try {
+        const allStyles = await BeardStyle.findAll({});
+        allDbStyles = allStyles;
+      } catch (_) {
+        allDbStyles = dbRecommendations;
+      }
+    }
+
     const mergedRecommendations = aiStyles.length > 0
-      ? mergeRecommendations(aiStyles, dbRecommendations)
+      ? mergeRecommendations(aiStyles, allDbStyles)
       : dbRecommendations;
 
     res.json({
@@ -232,6 +244,20 @@ function mergeRecommendations(aiRecommendations, dbStyles) {
     return null;
   }).filter(Boolean);
 }
+
+// Get per-style generation configuration (for frontend to use correct neckPad etc.)
+// GET /api/styles/generation-config/:styleSlug
+// Defined BEFORE /:id to avoid route conflict
+router.get('/generation-config/:styleSlug', (req, res) => {
+  const config = ReplicateService.getStyleConfig(req.params.styleSlug);
+  res.json({
+    styleSlug:      req.params.styleSlug,
+    neckPad:        config.neckPad,
+    maskBlur:       config.maskBlur,
+    strength:       config.strength,
+    guidance_scale: config.guidance_scale,
+  });
+});
 
 // Get single beard style by ID or slug
 router.get('/:id', async (req, res, next) => {
@@ -374,11 +400,11 @@ router.post('/visualize', async (req, res, next) => {
 
 // Generate realistic beard photo via Replicate inpainting
 // POST /api/styles/generate-realistic
-// Body: { imageBase64, maskBase64, styleSlug }
+// Body: { imageBase64, maskBase64, styleSlug, quality?, strengthOverride? }
 // Auth: optional — logged-in users get the result saved to their history
 router.post('/generate-realistic', optionalAuth, async (req, res, next) => {
   try {
-    const { imageBase64, maskBase64, styleSlug } = req.body;
+    const { imageBase64, maskBase64, styleSlug, quality, strengthOverride } = req.body;
 
     // ── Validation ──────────────────────────────────────────────────────────
     if (!imageBase64) {
@@ -390,6 +416,12 @@ router.post('/generate-realistic', optionalAuth, async (req, res, next) => {
     if (!styleSlug) {
       return res.status(400).json({ error: 'styleSlug is required (e.g. "full-beard", "stubble")' });
     }
+    if (quality && !['preview', 'full'].includes(quality)) {
+      return res.status(400).json({ error: 'quality must be "preview" or "full"' });
+    }
+    if (strengthOverride != null && (strengthOverride < 0.5 || strengthOverride > 1.0)) {
+      return res.status(400).json({ error: 'strengthOverride must be between 0.5 and 1.0' });
+    }
 
     // ── Service availability check ───────────────────────────────────────────
     if (!ReplicateService.isAvailable() && process.env.USE_MOCK_AI !== 'true') {
@@ -398,13 +430,14 @@ router.post('/generate-realistic', optionalAuth, async (req, res, next) => {
       });
     }
 
-    console.log(`🎨 [/generate-realistic] styleSlug=${styleSlug}, user=${req.user?.id || 'anonymous'}`);
+    console.log(`🎨 [/generate-realistic] style=${styleSlug} quality=${quality || 'full'} strength=${strengthOverride || 'auto'} user=${req.user?.id || 'anonymous'}`);
 
     // ── Generate ─────────────────────────────────────────────────────────────
     const result = await ReplicateService.generateBeardVisualization(
       imageBase64,
       maskBase64,
       styleSlug,
+      { quality: quality || 'full', strengthOverride },
     );
 
     res.json({

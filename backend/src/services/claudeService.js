@@ -1,7 +1,10 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs').promises;
 const path = require('path');
-const sharp = require('sharp');
+
+// sharp is optional — gracefully falls back if unavailable
+let sharp;
+try { sharp = require('sharp'); } catch (_) { sharp = null; }
 
 // Model configurable via env var; fallback to last known-working ID
 const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-5-20250929';
@@ -9,6 +12,7 @@ const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-5-20250929';
 // Initialize Claude client
 const anthropic = new Anthropic({
   apiKey: process.env.CLAUDE_API_KEY,
+  timeout: 60000, // 60s timeout — prevent hanging requests
 });
 
 // System prompt koji definise ulogu i ponasanje AI asistenta
@@ -55,14 +59,24 @@ class ClaudeService {
       }
 
       // Read and compress image before sending to Claude API
-      // Resize to max 1024px and convert to JPEG to reduce payload size
-      const compressedBuffer = await sharp(imagePath)
-        .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality: 80 })
-        .toBuffer();
+      let base64Image;
+      let mediaType;
 
-      const base64Image = compressedBuffer.toString('base64');
-      const mediaType = 'image/jpeg';
+      if (sharp) {
+        // Resize to max 1024px and convert to JPEG to reduce payload size
+        const compressedBuffer = await sharp(imagePath)
+          .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
+          .jpeg({ quality: 80 })
+          .toBuffer();
+        base64Image = compressedBuffer.toString('base64');
+        mediaType = 'image/jpeg';
+      } else {
+        // Fallback: read raw file
+        const rawBuffer = await fs.readFile(imagePath);
+        base64Image = rawBuffer.toString('base64');
+        const ext = path.extname(imagePath).toLowerCase();
+        mediaType = ext === '.png' ? 'image/png' : 'image/jpeg';
+      }
 
       // Create prompt for face analysis
       const prompt = `Analiziraj ovu sliku lica i daj detaljnu procjenu za stilove brade. Fokusiraj se na:
@@ -183,8 +197,8 @@ Odgovori STRIKTNO u JSON formatu, bez dodatnog teksta, sa sledećom strukturom:
     } catch (error) {
       console.error('Claude API error:', error);
 
-      // Fallback to mock data if credit balance error
-      if (error.message && error.message.includes('credit balance')) {
+      // Fallback to mock data if credit/billing error
+      if (error.message && (error.message.includes('credit balance') || error.message.includes('billing'))) {
         console.log('⚠️ Claude API credit error - falling back to MOCK data');
         return this.getMockAnalysis();
       }
@@ -201,6 +215,11 @@ Odgovori STRIKTNO u JSON formatu, bez dodatnog teksta, sa sledećom strukturom:
    */
   static async getPersonalizedMaintenanceTips(beardStyle, userPreferences) {
     try {
+      if (process.env.USE_MOCK_AI === 'true') {
+        console.log('🎭 Using MOCK maintenance tips (USE_MOCK_AI=true)');
+        return this.getMockMaintenanceTips();
+      }
+
       const { lifestyle, maintenancePreference, ageRange } = userPreferences;
 
       const prompt = `Kreiraj personalizirani vodič za održavanje brade za sledećeg korisnika:
@@ -265,6 +284,13 @@ Daj praktične, personalizirane savjete u JSON formatu:
       return JSON.parse(jsonMatch[0]);
     } catch (error) {
       console.error('Claude API error:', error);
+
+      // Fallback to mock data on credit/billing errors
+      if (error.message && (error.message.includes('credit balance') || error.message.includes('billing'))) {
+        console.log('⚠️ Claude API credit error in maintenanceTips — falling back to MOCK data');
+        return this.getMockMaintenanceTips();
+      }
+
       throw new Error(`Maintenance tips generation failed: ${error.message}`);
     }
   }
@@ -276,6 +302,12 @@ Daj praktične, personalizirane savjete u JSON formatu:
    */
   static async enhanceRecommendations(questionnaireData) {
     try {
+      // Use mock data if explicitly enabled
+      if (process.env.USE_MOCK_AI === 'true') {
+        console.log('🎭 Using MOCK AI enhancement (USE_MOCK_AI=true)');
+        return this.getMockEnhancement();
+      }
+
       const prompt = `Na osnovu sledećeg upitnika, daj dodatne AI-powered preporuke:
 
 ${JSON.stringify(questionnaireData, null, 2)}
@@ -316,6 +348,13 @@ Daj odgovor u JSON formatu sa sledećim poljima:
       return JSON.parse(jsonMatch[0]);
     } catch (error) {
       console.error('Claude API error:', error);
+
+      // Fallback to mock data on credit/billing errors
+      if (error.message && (error.message.includes('credit balance') || error.message.includes('billing'))) {
+        console.log('⚠️ Claude API credit error in enhanceRecommendations — falling back to MOCK data');
+        return this.getMockEnhancement();
+      }
+
       throw new Error(`Recommendation enhancement failed: ${error.message}`);
     }
   }
@@ -339,6 +378,7 @@ Daj odgovor u JSON formatu sa sledećim poljima:
       recommendedStyles: [
         {
           styleName: 'Full Beard',
+          slug: 'full-beard',
           matchScore: 92,
           reasoning: 'Vaš ovalni oblik lica je idealan za punu bradu. Ovaj stil će dodatno naglasiti vašu jaku strukturu vilice i stvoriti savršenu ravnotežu sa vašim proporcijama lica.',
           keyBenefits: [
@@ -350,6 +390,7 @@ Daj odgovor u JSON formatu sa sledećim poljima:
         },
         {
           styleName: 'Corporate Beard',
+          slug: 'corporate-beard',
           matchScore: 89,
           reasoning: 'Srednje duga, uredna brada koja odgovara poslovnom okruženju. Vaša dobra simetrija lica omogućava lako održavanje ovog stila.',
           keyBenefits: [
@@ -361,6 +402,7 @@ Daj odgovor u JSON formatu sa sledećim poljima:
         },
         {
           styleName: 'Goatee',
+          slug: 'goatee',
           matchScore: 85,
           reasoning: 'Za ovalni oblik lica, goatee može dodati definiciju badi bez preterivanja. Odličan izbor za one koji preferiraju minimalistički pristup.',
           keyBenefits: [
@@ -372,6 +414,7 @@ Daj odgovor u JSON formatu sa sledećim poljima:
         },
         {
           styleName: 'Stubble',
+          slug: 'stubble',
           matchScore: 82,
           reasoning: 'Trodnevni look koji daje casual, ali uredan izgled. Vaša jaka vilica će biti vidljiva dok ćete imati moderan beard style.',
           keyBenefits: [
@@ -383,6 +426,7 @@ Daj odgovor u JSON formatu sa sledećim poljima:
         },
         {
           styleName: 'Van Dyke',
+          slug: 'van-dyke',
           matchScore: 78,
           reasoning: 'Klasičan stil koji kombinuje mustache i pointed goatee. Vaš rounded chin dobro se uklapa sa ovim stilom.',
           keyBenefits: [
@@ -432,6 +476,55 @@ Daj odgovor u JSON formatu sa sledećim poljima:
       analyzedAt: new Date().toISOString(),
       modelUsed: 'mock-development',
       confidence: 88
+    };
+  }
+
+  static getMockEnhancement() {
+    return {
+      personalityBasedStyles: ['Full Beard — za samopouzdane muškarce', 'Corporate Beard — za profesionalce'],
+      careerAppropriate: ['Corporate Beard', 'Short Boxed Beard', 'Stubble'],
+      trendingRecommendations: ['Textured Full Beard', 'Faded Beard', 'Natural Stubble'],
+      uniqueSuggestions: ['Ducktail — za one koji žele nešto drugačije', 'Balbo — klasičan i elegantan'],
+      styleEvolution: {
+        beginner: 'Stubble — lako za početak, minimalno održavanje',
+        intermediate: 'Corporate Beard — definisan, uredan look',
+        advanced: 'Full Beard — zahtijeva posvećenost ali daje najimpresivniji rezultat',
+      },
+      complementaryGrooming: [
+        'Redovno šišanje kose za uravnotežen izgled',
+        'Njega kože ispod brade hidratantnom kremom',
+        'Definisanje linije vrata za čist izgled',
+      ],
+    };
+  }
+
+  static getMockMaintenanceTips() {
+    return {
+      dailyRoutine: {
+        morning: ['Pranje brade blagim šamponom', 'Nanošenje ulja za bradu', 'Češljanje za definisanje smjera rasta'],
+        evening: ['Pranje lica', 'Nanošenje balzama prije spavanja'],
+        estimatedTime: '5-10 minuta',
+      },
+      weeklyTasks: ['Trimovanje na željenu dužinu', 'Definisanje linije vrata', 'Deep conditioning tretman'],
+      productRecommendations: [
+        { category: 'Beard Oil', why: 'Hidratacija i mekšanje', frequency: 'Svaki dan' },
+        { category: 'Beard Balm', why: 'Stilizovanje i zaštita', frequency: 'Svaki dan' },
+        { category: 'Beard Shampoo', why: 'Dubinsko čišćenje', frequency: '2-3x sedmično' },
+      ],
+      lifestyleSpecificTips: ['Nosite zaštitu za bradu pri sportu', 'Koristite UV zaštitu ljeti'],
+      commonMistakes: ['Previše česta upotreba šampona', 'Ignorisanje linije vrata', 'Trimovanje mokre brade'],
+      professionalCare: {
+        frequency: 'Svake 3-4 sedmice',
+        whatToAsk: 'Tražite definisanje linija i blago stanjivanje za prirodan izgled',
+      },
+      seasonalAdvice: {
+        summer: 'Kraći stilovi, češće pranje, UV zaštita',
+        winter: 'Duži stilovi, više ulja za zaštitu od sušenja',
+      },
+      troubleshooting: [
+        { problem: 'Suha koža ispod brade', solution: 'Koristite ulje za bradu svakodnevno i eksfolirajte 1x sedmično' },
+        { problem: 'Svrbež brade', solution: 'Koristite beard wash umjesto običnog sapuna' },
+      ],
     };
   }
 }

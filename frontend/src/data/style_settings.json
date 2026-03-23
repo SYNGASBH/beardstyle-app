@@ -1,0 +1,420 @@
+{
+  "$schema": "style_settings_schema.json",
+  "version": "1.0.0",
+  "generated": "2026-03-23T00:00:19",
+  "total_styles": 16,
+  "styles": [
+    {
+      "id": 12,
+      "slug": "anchor-beard",
+      "name": "Anchor Beard",
+      "description": "Brada u obliku sidra sa tankom linijom duž vilice. Precizna i moderna.",
+      "maintenance_level": "high",
+      "style_category": "artistic",
+      "growth_time_weeks": 5,
+      "image_url": "/assets/sketches/anchor-beard.webp",
+      "thumbnail_url": "/assets/thumbnails/anchor-beard-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Precizno održavanje linija. Tanka linija duž vilice. Soul patch ispod usana.",
+      "popularity_score": 64,
+      "recommended_face_types": [
+        "Oval",
+        "Rectangle",
+        "Heart"
+      ],
+      "tags": [
+        "Artistic",
+        "High Maintenance",
+        "Modern",
+        "Young"
+      ]
+    },
+    {
+      "id": 7,
+      "slug": "balbo",
+      "name": "Balbo",
+      "description": "Brada bez spojenih mustaća. Moderna i urbana.",
+      "maintenance_level": "high",
+      "style_category": "modern",
+      "growth_time_weeks": 4,
+      "image_url": "/assets/sketches/balbo.webp",
+      "thumbnail_url": "/assets/thumbnails/balbo-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Oštri uglovi. Mustaće odvojene od brade. Precizno brijanje.",
+      "popularity_score": 78,
+      "recommended_face_types": [
+        "Oval",
+        "Square",
+        "Rectangle"
+      ],
+      "tags": [
+        "High Maintenance",
+        "Modern",
+        "Trendy",
+        "Young"
+      ]
+    },
+    {
+      "id": 14,
+      "slug": "beardstache",
+      "name": "Beardstache",
+      "description": "Istaknute mustaće sa kraćom bradom. Trendy i pažnje privlačan.",
+      "maintenance_level": "medium",
+      "style_category": "trendy",
+      "growth_time_weeks": 4,
+      "image_url": "/assets/sketches/beardstache.webp",
+      "thumbnail_url": "/assets/thumbnails/beardstache-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Duže mustaće (10-15mm), kraća brada (3-5mm). Koristi vosak za mustaće.",
+      "popularity_score": 86,
+      "recommended_face_types": [
+        "Oval",
+        "Square",
+        "Rectangle"
+      ],
+      "tags": [
+        "Hipster",
+        "Medium Maintenance",
+        "Trendy",
+        "Young"
+      ]
+    },
+    {
+      "id": 13,
+      "slug": "chin-strap",
+      "name": "Chin Strap",
+      "description": "Tanka linija brade duž vilice bez mustaća. Definisan i urbani.",
+      "maintenance_level": "high",
+      "style_category": "modern",
+      "growth_time_weeks": 3,
+      "image_url": "/assets/sketches/chin-strap.webp",
+      "thumbnail_url": "/assets/thumbnails/chin-strap-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Održavaj tanku liniju (3-5mm). Obrij obraze i mustaće. Precizne ivice.",
+      "popularity_score": 62,
+      "recommended_face_types": [
+        "Oval",
+        "Round",
+        "Heart"
+      ],
+      "tags": [
+        "Casual",
+        "High Maintenance",
+        "Modern",
+        "Young"
+      ]
+    },
+    {
+      "id": 8,
+      "slug": "circle-beard",
+      "name": "Circle Beard",
+      "description": "Kružna brada - goatee spojeno sa mustafama. Versatilan i popularan.",
+      "maintenance_level": "medium",
+      "style_category": "modern",
+      "growth_time_weeks": 3,
+      "image_url": "/assets/sketches/circle-beard.webp",
+      "thumbnail_url": "/assets/thumbnails/circle-beard-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Održavaj kružni oblik. Obrij obraze. Trimuj na jednu dužinu.",
+      "popularity_score": 89,
+      "recommended_face_types": [
+        "Oval",
+        "Round",
+        "Square",
+        "Heart"
+      ],
+      "tags": [
+        "Medium Maintenance",
+        "Modern",
+        "Professional",
+        "Timeless"
+      ]
+    },
+    {
+      "id": 1,
+      "slug": "clean-shaven",
+      "name": "Clean Shaven",
+      "description": "Klasičan izgled bez brade. Idealno za profesionalne sredine i toplo vrijeme.",
+      "maintenance_level": "high",
+      "style_category": "corporate",
+      "growth_time_weeks": 0,
+      "image_url": "/assets/sketches/clean-shaven.webp",
+      "thumbnail_url": "/assets/thumbnails/clean-shaven-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Brijanje svakih 1-2 dana. Koristi kvalitetnu pjenu i nakon brijanja losion.",
+      "popularity_score": 99,
+      "recommended_face_types": [
+        "Oval",
+        "Round",
+        "Square",
+        "Rectangle",
+        "Heart",
+        "Diamond",
+        "Triangle"
+      ],
+      "tags": [
+        "Corporate",
+        "High Maintenance",
+        "Professional",
+        "Timeless"
+      ]
+    },
+    {
+      "id": 15,
+      "slug": "corporate-beard",
+      "name": "Corporate Beard",
+      "description": "Kratka, uredno održavana brada. Savršena za poslovno okruženje.",
+      "maintenance_level": "medium",
+      "style_category": "corporate",
+      "growth_time_weeks": 4,
+      "image_url": "/assets/sketches/corporate-beard.webp",
+      "thumbnail_url": "/assets/thumbnails/corporate-beard-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Trimuj na 6-9mm. Oštri uglovi. Dnevno četkanje. Koristi ulje za sjaj.",
+      "popularity_score": 97,
+      "recommended_face_types": [
+        "Oval",
+        "Square",
+        "Rectangle"
+      ],
+      "tags": [
+        "Corporate",
+        "Medium Maintenance",
+        "Professional",
+        "Timeless"
+      ]
+    },
+    {
+      "id": 9,
+      "slug": "ducktail",
+      "name": "Ducktail",
+      "description": "Puna brada sa špicim krajem. Ikonski i muževan stil.",
+      "maintenance_level": "medium",
+      "style_category": "rugged",
+      "growth_time_weeks": 10,
+      "image_url": "/assets/sketches/ducktail.webp",
+      "thumbnail_url": "/assets/thumbnails/ducktail-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Pusti da raste duže na bradi. Oblikuj špic. Koristi balzam.",
+      "popularity_score": 80,
+      "recommended_face_types": [
+        "Oval",
+        "Square",
+        "Rectangle",
+        "Triangle"
+      ],
+      "tags": [
+        "Casual",
+        "Mature",
+        "Medium Maintenance",
+        "Rugged"
+      ]
+    },
+    {
+      "id": 4,
+      "slug": "full-beard",
+      "name": "Full Beard",
+      "description": "Klasična puna brada. Vremeplovana i muževna.",
+      "maintenance_level": "medium",
+      "style_category": "casual",
+      "growth_time_weeks": 8,
+      "image_url": "/assets/sketches/full-beard.webp",
+      "thumbnail_url": "/assets/thumbnails/full-beard-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Redovno četkaj i koristi ulje za bradu. Trimuj krajeve mjesečno.",
+      "popularity_score": 177,
+      "recommended_face_types": [
+        "Oval",
+        "Round",
+        "Rectangle",
+        "Triangle"
+      ],
+      "tags": [
+        "Casual",
+        "Medium Maintenance",
+        "Rugged",
+        "Timeless"
+      ]
+    },
+    {
+      "id": 10,
+      "slug": "garibaldi",
+      "name": "Garibaldi",
+      "description": "Široka, puna brada sa zaobljenim dnom. Robusna i prirodna.",
+      "maintenance_level": "low",
+      "style_category": "rugged",
+      "growth_time_weeks": 12,
+      "image_url": "/assets/sketches/garibaldi.webp",
+      "thumbnail_url": "/assets/thumbnails/garibaldi-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Minimalno trimovanje. Prirodan rast. Zaoblji dno na 15-20cm.",
+      "popularity_score": 71,
+      "recommended_face_types": [
+        "Oval",
+        "Square",
+        "Rectangle"
+      ],
+      "tags": [
+        "Low Maintenance",
+        "Mature",
+        "Outdoor",
+        "Rugged"
+      ]
+    },
+    {
+      "id": 5,
+      "slug": "goatee",
+      "name": "Goatee",
+      "description": "Brada samo na bradi i ispod usana. Casual i artistički.",
+      "maintenance_level": "medium",
+      "style_category": "artistic",
+      "growth_time_weeks": 3,
+      "image_url": "/assets/sketches/goatee.webp",
+      "thumbnail_url": "/assets/thumbnails/goatee-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Precizno održavanje ivica. Obrij obraze i vrat čisto.",
+      "popularity_score": 76,
+      "recommended_face_types": [
+        "Oval",
+        "Round",
+        "Heart",
+        "Diamond"
+      ],
+      "tags": [
+        "Artistic",
+        "Casual",
+        "Classic",
+        "Medium Maintenance"
+      ]
+    },
+    {
+      "id": 16,
+      "slug": "handlebar",
+      "name": "Handlebar",
+      "description": "Upečatljivi brkovi sa karakterističnim savijenim krajevima prema gore. Klasičan vintage stil koji zahtijeva redovno oblikovanje voskom.",
+      "maintenance_level": "high",
+      "style_category": "artistic",
+      "growth_time_weeks": 6,
+      "image_url": "/assets/sketches/handlebar.webp",
+      "thumbnail_url": "/assets/thumbnails/handlebar-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Nanosi vosak za brkove svaki dan. Oblikuj krajeve prema gore koristeći toplu tehniku. Trimuj bradu na 1-2cm da brkovi dominiraju. Redovno posjećuj berbera za precizno oblikovanje.",
+      "popularity_score": 88,
+      "recommended_face_types": [
+        "Oval",
+        "Square",
+        "Rectangle",
+        "Diamond"
+      ],
+      "tags": [
+        "Artistic",
+        "Classic",
+        "Creative",
+        "High Maintenance",
+        "Hipster",
+        "Mature"
+      ]
+    },
+    {
+      "id": 11,
+      "slug": "mutton-chops",
+      "name": "Mutton Chops",
+      "description": "Zaliske spojene sa mustafama, bez brade. Jedinstven i smeo stil.",
+      "maintenance_level": "high",
+      "style_category": "artistic",
+      "growth_time_weeks": 6,
+      "image_url": "/assets/sketches/mutton-chops.webp",
+      "thumbnail_url": "/assets/thumbnails/mutton-chops-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Obrij bradu čisto. Pusti zaliske da rastu. Oblikuj ivice.",
+      "popularity_score": 68,
+      "recommended_face_types": [
+        "Square",
+        "Rectangle"
+      ],
+      "tags": [
+        "Artistic",
+        "Classic",
+        "Creative",
+        "High Maintenance"
+      ]
+    },
+    {
+      "id": 3,
+      "slug": "short-boxed",
+      "name": "Short Boxed Beard",
+      "description": "Kratka, uredna brada sa definisanim konturama. Profesionalna i moderna.",
+      "maintenance_level": "medium",
+      "style_category": "corporate",
+      "growth_time_weeks": 3,
+      "image_url": "/assets/sketches/short-boxed-beard.webp",
+      "thumbnail_url": "/assets/thumbnails/short-boxed-beard-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Trimuj na 6-12mm. Oštri uglovi na obrazima. Redovno održavanje linija.",
+      "popularity_score": 108,
+      "recommended_face_types": [
+        "Oval",
+        "Square",
+        "Rectangle"
+      ],
+      "tags": [
+        "Classic",
+        "Corporate",
+        "Medium Maintenance",
+        "Professional"
+      ]
+    },
+    {
+      "id": 2,
+      "slug": "stubble-3day",
+      "name": "Stubble (3-Day Shadow)",
+      "description": "Kratka neobrijana brada od 3-5 dana. Casual i muževan izgled.",
+      "maintenance_level": "low",
+      "style_category": "casual",
+      "growth_time_weeks": 0,
+      "image_url": "/assets/sketches/stubble-3day.webp",
+      "thumbnail_url": "/assets/thumbnails/stubble-3day-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Održavaj dužinu sa trimerom na 3-5mm. Definiši linije vrata i obraza.",
+      "popularity_score": 132,
+      "recommended_face_types": [
+        "Oval",
+        "Round",
+        "Square",
+        "Rectangle",
+        "Heart"
+      ],
+      "tags": [
+        "Casual",
+        "Low Maintenance",
+        "Modern",
+        "Young"
+      ]
+    },
+    {
+      "id": 6,
+      "slug": "van-dyke",
+      "name": "Van Dyke",
+      "description": "Kombinacija goateeja i mustafa. Sofisticiran i artistički.",
+      "maintenance_level": "high",
+      "style_category": "artistic",
+      "growth_time_weeks": 4,
+      "image_url": "/assets/sketches/van-dyke.webp",
+      "thumbnail_url": "/assets/thumbnails/van-dyke-thumb.webp",
+      "overlay_svg": null,
+      "instructions": "Zahtijeva preciznost. Mustaće i goatee odvojeni. Dnevno održavanje.",
+      "popularity_score": 76,
+      "recommended_face_types": [
+        "Oval",
+        "Rectangle",
+        "Heart"
+      ],
+      "tags": [
+        "Artistic",
+        "Classic",
+        "Formal",
+        "High Maintenance"
+      ]
+    }
+  ]
+}

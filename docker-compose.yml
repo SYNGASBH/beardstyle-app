@@ -5,9 +5,9 @@ services:
     container_name: beard_style_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: bearduser
+      POSTGRES_PASSWORD: beardpass123
+      POSTGRES_DB: beard_style_db
     ports:
       - "5433:5432"
     volumes:
@@ -16,7 +16,7 @@ services:
       - ./database/migrations:/docker-entrypoint-initdb.d/migrations
       - ./database/seeds:/docker-entrypoint-initdb.d/seeds
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U bearduser -d beard_style_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,18 +29,15 @@ services:
     container_name: beard_style_api
     restart: unless-stopped
     environment:
-      NODE_ENV: ${NODE_ENV}
-      PORT: ${PORT}
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      NODE_ENV: development
+      PORT: 5000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-bearduser}:${POSTGRES_PASSWORD:-beardpass123}@postgres:5432/${POSTGRES_DB:-beard_style_db}
       JWT_SECRET: ${JWT_SECRET}
-      FRONTEND_URL: ${FRONTEND_URL}
-      USE_MOCK_AI: ${USE_MOCK_AI}
-      CLAUDE_API_KEY: ${CLAUDE_API_KEY}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
+      USE_MOCK_AI: ${USE_MOCK_AI:-true}
+      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN:-}
+      CLAUDE_API_KEY: ${CLAUDE_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     ports:
       - "5000:5000"
     volumes:
@@ -52,7 +49,7 @@ services:
         condition: service_healthy
     command: npm run dev
 
-  # Frontend React App (nginx + production build)
+  # Frontend React App (nginx serves built React app)
   frontend:
     build:
       context: ./frontend

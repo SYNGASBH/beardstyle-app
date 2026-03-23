@@ -1,7 +1,7 @@
 import axios from 'axios';
 import useAuthStore from '../context/useAuthStore';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance
 const api = axios.create({
@@ -30,9 +30,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const status = error.response?.status;
-    if (status === 401 || (status === 403 && error.response?.data?.error === 'Invalid token')) {
-      // Token expired, invalid, or signed with old secret — force re-login
+    if (error.response?.status === 401) {
+      // Token expired or invalid
       useAuthStore.getState().logout();
       window.location.href = '/login';
     }
@@ -68,11 +67,6 @@ export const userAPI = {
   removeFavorite: (styleId) => api.delete(`/user/favorites/${styleId}`),
   getAIAnalysis: (uploadId) => api.get(`/user/analysis/${uploadId}`),
   getMaintenanceTips: (data) => api.post('/user/maintenance-tips', data),
-  saveAnalysis: (data) => api.post('/user/save-analysis', data),
-  getSavedAnalyses: () => api.get('/user/analyses'),
-  getPremiumStatus: () => api.get('/user/premium-status'),
-  getLessonProgress: () => api.get('/user/lessons/progress'),
-  completeLesson: (courseId, lessonId) => api.post('/user/lessons/complete', { courseId, lessonId }),
 };
 
 // ============================================
@@ -81,22 +75,19 @@ export const userAPI = {
 
 export const stylesAPI = {
   getAll: (filters) => api.get('/styles', { params: filters }),
-  getPaginated: ({ limit = 20, offset = 0, ...filters } = {}) =>
-    api.get('/styles', { params: { limit, offset, ...filters } }),
+  getPaginated: (params) => api.get('/styles', { params }),
   getPopular: (limit = 10) => api.get('/styles/popular', { params: { limit } }),
   getRecommendations: (questionnaireData) => api.post('/styles/recommend', questionnaireData),
   getById: (id) => api.get(`/styles/${id}`),
   getBySlug: (slug) => api.get(`/styles/slug/${slug}`),
   getTags: () => api.get('/styles/meta/tags'),
   getFaceTypes: () => api.get('/styles/meta/face-types'),
+  getGenerationConfig: (styleSlug) => api.get(`/styles/generation-config/${styleSlug}`),
   visualizeBeard: (uploadId, styleId) => api.post('/styles/visualize', { uploadId, styleId }),
-
-  // Realistic inpainting via Replicate — Korak 2/3
-  // imageBase64 and maskBase64 come from the frontend (generateBeardMask.js)
-  generateRealistic: (imageBase64, maskBase64, styleSlug) =>
-    api.post('/styles/generate-realistic', { imageBase64, maskBase64, styleSlug }, {
-      timeout: 150000, // 2.5 min — Replicate cold starts can be slow
-    }),
+  generateRealistic: (imageBase64, maskBase64, styleSlug, options = {}) =>
+    api.post('/styles/generate-realistic', {
+      imageBase64, maskBase64, styleSlug, ...options,
+    }, { timeout: 150000 }),
 };
 
 // ============================================
