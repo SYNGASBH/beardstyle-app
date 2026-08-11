@@ -371,9 +371,9 @@ SELECT 15, id FROM tags WHERE name IN ('Corporate', 'Professional', 'Medium Main
 
 -- Password: demo123 (bcrypt hash)
 INSERT INTO users (email, password_hash, first_name, last_name, phone) VALUES
-('amel@syngasbh.com', '$2b$10$rZ7YvXOGqX1rHJqHJ7WqBOw8TGz.p5K5S5PXJ1KJX1zKJ5K5K5K5K', 'Amel', 'Demo', '+387 61 234 567'),
-('demo@example.com', '$2b$10$rZ7YvXOGqX1rHJqHJ7WqBOw8TGz.p5K5S5PXJ1KJX1zKJ5K5K5K5K', 'Demo', 'User', '+387 62 123 456');
+('amel@syngasbh.com', '$2a$10$g9Tozm/HRJxdsXldYGsUoeskjHDQtWhA/4j/wm/rZ2vCUeGQZwj5.', 'Amel', 'Demo', '+387 61 234 567'),
+('demo@example.com', '$2a$10$g9Tozm/HRJxdsXldYGsUoeskjHDQtWhA/4j/wm/rZ2vCUeGQZwj5.', 'Demo', 'User', '+387 62 123 456');
 
 -- Demo Salon Account
 INSERT INTO salon_accounts (salon_name, email, password_hash, phone, city, country, subscription_tier) VALUES
-('Frizerski Salon Premium', 'salon@example.com', '$2b$10$rZ7YvXOGqX1rHJqHJ7WqBOw8TGz.p5K5S5PXJ1KJX1zKJ5K5K5K5K', '+387 33 123 456', 'Sarajevo', 'Bosnia and Herzegovina', 'premium');
+('Frizerski Salon Premium', 'salon@example.com', '$2a$10$g9Tozm/HRJxdsXldYGsUoeskjHDQtWhA/4j/wm/rZ2vCUeGQZwj5.', '+387 33 123 456', 'Sarajevo', 'Bosnia and Herzegovina', 'premium');
