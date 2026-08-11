@@ -120,11 +120,11 @@ const PreviewPage = () => {
         if (styleId) {
           // Load by ID
           const response = await stylesAPI.getById(styleId);
-          setSelectedStyle(response.data);
+          setSelectedStyle(response.data?.style || response.data);
         } else if (slug) {
           // Load by slug
           const response = await stylesAPI.getBySlug(slug);
-          setSelectedStyle(response.data);
+          setSelectedStyle(response.data?.style || response.data);
         }
       } catch (err) {
         console.error('Error loading specific style:', err);
