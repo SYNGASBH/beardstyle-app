@@ -139,8 +139,8 @@ const CoursePlayer = ({ isPremium = false, onUpgrade }) => {
   const selectedCourse = COURSES.find(c => c.id === selectedCourseId);
   const selectedLesson = selectedCourse?.lessons.find(l => l.id === selectedLessonId);
 
-  const canAccessCourse = (course) => isPremium || course.plan === 'free';
-  const canAccessLesson = (lesson) => isPremium || lesson.plan === 'free';
+  const canAccessCourse = useCallback((course) => isPremium || course.plan === 'free', [isPremium]);
+  const canAccessLesson = useCallback((lesson) => isPremium || lesson.plan === 'free', [isPremium]);
 
   const getCourseProgress = useCallback((course) => {
     const accessible = course.lessons.filter(l => isPremium || l.plan === 'free');
@@ -161,7 +161,7 @@ const CoursePlayer = ({ isPremium = false, onUpgrade }) => {
     const lesson = selectedCourse?.lessons.find(l => l.id === lessonId);
     if (!lesson || !canAccessLesson(lesson)) return;
     setSelectedLessonId(lessonId);
-  }, [selectedCourse, isPremium, canAccessLesson]);
+  }, [selectedCourse, canAccessLesson]);
 
   const goBack = useCallback(() => {
     if (selectedLessonId) setSelectedLessonId(null);
