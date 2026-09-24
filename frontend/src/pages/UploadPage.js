@@ -127,10 +127,6 @@ const UploadPage = () => {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user' },
       });
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        videoRef.current.play();
-      }
       setStream(mediaStream);
       setUseCamera(true);
       setError(null);
@@ -139,7 +135,13 @@ const UploadPage = () => {
       console.error('Camera error:', err);
     }
   };
-
+// Poveži stream s videom tek kad je <video> iscrtan
+  useEffect(() => {
+    if (useCamera && stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [useCamera, stream]);
   const stopCamera = () => {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
@@ -295,7 +297,7 @@ const UploadPage = () => {
       {useCamera && (
         <div className="space-y-4">
           <div className="relative bg-black rounded-lg overflow-hidden">
-            <video ref={videoRef} className="w-full" autoPlay playsInline />
+            <video ref={videoRef} className="w-full" autoPlay playsInline muted />
           </div>
           <div className="flex gap-4 justify-center">
             <button
