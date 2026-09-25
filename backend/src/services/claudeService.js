@@ -26,7 +26,7 @@ Pomažeš korisnicima da:
 - Naprave informirani izbor uzimajući u obzir životni stil, posao i preferencije
 
 ## Tvoja Ekspertiza
-- Analiza oblika lica: oval, okruglo, kvadratno, pravougaono, srcoliko, dijamant, trougaono
+- Analiza oblika lica: oval, round, square, rectangle, heart, diamond, triangle
 - Stilovi brade: full beard, stubble, goatee, van dyke, corporate beard, circle beard, extended goatee, yeard, garibaldi, ducktail, balbo, chin strap, mutton chops, horseshoe mustache, imperial beard, anchor beard
 - Proizvodi za bradu: ulja, balzami, šamponi, kondicioneri, voskovi
 - Tehnike trimminga i oblikovanja
@@ -81,7 +81,7 @@ class ClaudeService {
       // Create prompt for face analysis
       const prompt = `Analiziraj ovu sliku lica i daj detaljnu procjenu za stilove brade. Fokusiraj se na:
 
-1. **Oblik Lica**: Odredi precizno oblik lica (okruglo, ovalno, kvadratno, pravougaono, dijamant, srcoliko, trougaono)
+1. **Oblik Lica**: Odredi oblik lica i vrati TAČNO jednu vrijednost: oval, round, square, rectangle, heart, diamond, triangle
 
 2. **Karakteristike Lica**:
    - Širina čela
@@ -92,7 +92,7 @@ class ClaudeService {
    - Karakteristike brade (gustina, oblik)
 
 3. **Preporuke Stilova Brade**:
-   - Navedi 5-7 konkretnih stilova brade koji bi najbolje odgovarali ovom obliku lica
+   - Navedi TAČNO 4 stila brade koji najbolje odgovaraju ovom obliku lica
    - Za svaki stil objasni ZAŠTO bi odgovarao ovoj osobi
    - Rangiraj stilove od najpogodnijeg ka manje pogodnim
 
@@ -108,10 +108,15 @@ class ClaudeService {
    - Potrebni proizvodi (ulja, balzami)
    - Tehnike oblikovanja
 
+PRAVILA DUŽINE (obavezno):
+- "reasoning" i "visualBalance": najviše 1 rečenica
+- svaka lista (keyBenefits, emphasize, minimize, recommendedProducts, stylingTechniques): najviše 2 kratke stavke
+- "additionalNotes": najviše 1 rečenica
+
 Odgovori STRIKTNO u JSON formatu, bez dodatnog teksta, sa sledećom strukturom:
 
 {
-  "faceShape": "string (naziv oblika lica)",
+  "faceShape": "TAČNO jedna od: oval | round | square | rectangle | heart | diamond | triangle (mala slova, bez dodatnog teksta)",
   "faceShapeConfidence": number (0-100, koliko si siguran u procjenu),
   "facialCharacteristics": {
     "foreheadWidth": "string (narrow/medium/wide)",
@@ -126,7 +131,7 @@ Odgovori STRIKTNO u JSON formatu, bez dodatnog teksta, sa sledećom strukturom:
       "styleName": "string (naziv stila brade na bosanskom/srpskom za prikaz korisniku)",
       "slug": "string (OBAVEZNO — tačan ID iz fiksne liste: 'full-beard', 'short-boxed', 'stubble', 'corporate', 'ducktail', 'goatee', 'van-dyke', 'balbo' — birati najbliži odgovarajući)",
       "matchScore": number (0-100),
-      "reasoning": "string (detaljno obrazloženje zašto ovaj stil odgovara)",
+      "reasoning": "string (1 rečenica: zašto ovaj stil odgovara ovom licu)",
       "keyBenefits": ["string", "string"],
       "visualBalance": "string (kako ovaj stil balansira lice)"
     }
@@ -152,9 +157,11 @@ Odgovori STRIKTNO u JSON formatu, bez dodatnog teksta, sa sledećom strukturom:
 }`;
 
       // Call Claude API with vision
+      // Call Claude API with vision
+      const t0 = Date.now();
       const message = await anthropic.messages.create({
         model: CLAUDE_MODEL,
-        max_tokens: 4096,
+        max_tokens: 2000,
         system: SYSTEM_PROMPT,
         messages: [
           {
@@ -176,6 +183,8 @@ Odgovori STRIKTNO u JSON formatu, bez dodatnog teksta, sa sledećom strukturom:
           },
         ],
       });
+
+	console.log(`[Claude] analiza: ${Date.now() - t0} ms | izlaz: ${message.usage?.output_tokens} tok | ulaz: ${message.usage?.input_tokens} tok | 	stop: ${message.stop_reason}`);
 
       // Extract and parse JSON response
       const responseText = message.content[0].text;

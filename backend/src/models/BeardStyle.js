@@ -168,7 +168,7 @@ class BeardStyle {
 
     // Get face type ID
     const faceTypeResult = await query(
-      'SELECT id FROM face_types WHERE name = $1',
+      'SELECT id FROM face_types WHERE LOWER(name) = LOWER($1)',
       [normalizedFaceShape]
     );
     
