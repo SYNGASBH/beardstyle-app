@@ -129,7 +129,8 @@ router.post('/recommend', async (req, res, next) => {
       ageRange,
     });
 
-    // Enhance recommendations with AI if we have questionnaire data
+    // Isključeno po defaultu: frontend ne koristi aiEnhanced (~22 s + trošak). Uključi: ENABLE_AI_ENHANCE=true
+    if (process.env.ENABLE_AI_ENHANCE === 'true') {
     try {
       aiEnhancedRecommendations = await ClaudeService.enhanceRecommendations({
         faceShape: searchFaceShape,
@@ -142,6 +143,7 @@ router.post('/recommend', async (req, res, next) => {
     } catch (aiError) {
       console.error('AI enhancement failed:', aiError);
       // Continue without AI enhancement
+    }
     }
 
     // Merge AI recommendations with database styles
