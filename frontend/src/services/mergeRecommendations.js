@@ -55,6 +55,11 @@ const SHAPE_ALIASES = {
   triangle:     'triangle',
   trokutno:     'triangle',
   trougaono:    'triangle',
+  duguljasto:   'oblong',
+  rectangle:    'oblong',
+  long:         'oblong',
+  trouglasto:   'triangle',
+  dijamantno:   'diamond',
 }
 
 /**
@@ -80,9 +85,12 @@ function extractJson(text) {
 function normalizeShape(raw) {
   return (raw || '')
     .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // č→c, š→s, ž→z, ć→c
+    .replace(/đ/g, 'dj')
+    .replace(/\(.*?\)/g, ' ')                          // ukloni "(duguljasto)"
     .trim()
-    .replace(/[\s-]+/g, '_')
-    .replace(/[^a-z_]/g, '')
+    .split(/[\s_\-,/]+/)[0]                            // samo prva riječ
+    .replace(/[^a-z]/g, '')
 }
 
 /**
