@@ -588,7 +588,7 @@ class ReplicateService {
   static getEditPrompt(styleSlug) {
     const STYLES = {
       'trodnevna-brada':    'a 3-day stubble: very short, even stubble of about 2-3 mm on the cheeks, jawline, chin and upper lip',
-      'kratka-brada':       'a short boxed beard: neatly trimmed, even length of about 1 cm, sharp clean cheek line and a tidy neckline',
+      'kratka-brada':       'a short boxed beard that fully covers the cheeks, jawline, chin and upper lip, evenly trimmed to about 1 cm, with a neat straight cheek line and a clean neckline',
       'korporativna-brada': 'a corporate beard: neat, conservative, about 1.5-2 cm long, clean cheek and neck lines, trimmed mustache',
       'puna-brada':         'a full thick beard about 5 cm long, well groomed, rounded at the bottom, connected to the mustache',
       'kruzna-brada':       'a circle beard: a mustache connected to a rounded goatee around the mouth and chin; cheeks and jaw sides clean-shaven',
@@ -608,6 +608,7 @@ class ReplicateService {
     return `Edit only the facial hair of the man in this photo. Change his beard into ${target}. ` +
       `Any area outside this style must be clean-shaven natural skin. ` +
       `Keep the same natural beard color as the original, including any grey hairs. ` +
+      `Do not add, remove or change any accessories such as glasses, hats or jewelry. ` +
       `Keep the face, identity, eyes, skin, head hair, glasses, clothing, lighting, background and framing exactly the same. ` +
       `Photorealistic, natural hair texture.`;
   }
