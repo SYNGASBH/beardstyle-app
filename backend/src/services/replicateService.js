@@ -438,7 +438,11 @@ class ReplicateService {
       console.log('🎭 [Replicate] Using mock visualization');
       return this.getMockVisualization(styleSlug);
     }
-
+    // ── Novi engine: instrukcijsko uređivanje (Nano Banana 2 Lite), bez maske ──
+    // Stari tok s maskom: postaviti BEARD_ENGINE=inpaint
+    if ((process.env.BEARD_ENGINE || 'edit') === 'edit') {
+      return this.generateBeardEdit(imageBase64, styleSlug);
+    }
     // ── Check cache first ──────────────────────────────────────────────────
     const cacheKey = getCacheKey(imageBase64, styleSlug, quality);
     const cached = getCachedResult(cacheKey);
@@ -462,10 +466,9 @@ class ReplicateService {
     // ── Resize images ──────────────────────────────────────────────────────
     const { resizedImageB64, resizedMaskB64, originalWidth, originalHeight, dominantHairColor } =
       await prepareImages(imageBase64, maskBase64, { targetSize });
-
     // ── Build prompt with hair color ───────────────────────────────────────
     const prompt = this.enrichPromptWithColor(config.prompt, dominantHairColor);
-
+   
     // ── Create Replicate prediction ────────────────────────────────────────
     const { data: prediction } = await axios.post(
       `${REPLICATE_API}/predictions`,
@@ -519,6 +522,95 @@ class ReplicateService {
     return { ...resultData, cached: false };
   }
 
+  /**
+   * Instrukcijsko uređivanje brade: google/nano-banana-2-lite (bez maske).
+   * Jedan sinhroni poziv (~4 s), originalni kadar, isti oblik odgovora kao inpainting.
+   */
+  static async generateBeardEdit(imageBase64, styleSlug) {
+    const EDIT_MODEL = 'google/nano-banana-2-lite';
+    const t0 = Date.now();
+
+    // Keš: jedan rezultat po slici i stilu (preview i full su isti poziv)
+    const cacheKey = getCacheKey(imageBase64, styleSlug, 'edit');
+    const cached = getCachedResult(cacheKey);
+    if (cached) {
+      console.log(`⚡ [Edit] Cache hit for ${styleSlug}`);
+      return { ...cached, cached: true };
+    }
+
+    // Slika: max 1024 px, JPEG, ispravna orijentacija, isti kadar
+    const raw = String(imageBase64).replace(/^data:[^;]+;base64,/, '');
+    const jpegBuf = await sharp(Buffer.from(raw, 'base64'))
+      .rotate()
+      .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 88 })
+      .toBuffer();
+
+    const prompt = this.getEditPrompt(styleSlug);
+
+    let { data: prediction } = await axios.post(
+      `${REPLICATE_API}/models/${EDIT_MODEL}/predictions`,
+      {
+        input: {
+          prompt,
+          image_input:   [toDataUrl(jpegBuf.toString('base64'), 'image/jpeg')],
+          aspect_ratio:  'match_input_image',
+          output_format: 'jpg',
+        },
+      },
+      { headers: { ...getAuthHeaders(), Prefer: 'wait=60' } },
+    );
+
+    // Ako sinhroni odgovor nije gotov, nastavi polling
+    if (prediction.status !== 'succeeded') {
+      prediction = await pollPrediction(prediction.id);
+    }
+    const outputUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output;
+    if (!outputUrl) throw new Error(`Replicate (${EDIT_MODEL}) nije vratio sliku: status=${prediction.status}`);
+
+    const localPath = await downloadAndSave(outputUrl, `${styleSlug}-edit`);
+    const ms = Date.now() - t0;
+    console.log(`✅ [Edit] ${styleSlug}: ${ms} ms | model ${EDIT_MODEL} | prediction ${prediction.id}`);
+
+    const resultData = {
+      imageUrl:    `/${localPath.replace(/\\/g, '/')}`,
+      localPath,
+      styleSlug,
+      model:       EDIT_MODEL,
+      quality:     'full',
+      generatedAt: new Date().toISOString(),
+      parameters:  { engine: 'edit', durationMs: ms },
+    };
+    setCachedResult(cacheKey, resultData);
+    return { ...resultData, cached: false };
+  }
+  /** Instrukcijski prompt po stilu (engleski daje najstabilnije rezultate) */
+  static getEditPrompt(styleSlug) {
+    const STYLES = {
+      'trodnevna-brada':    'a 3-day stubble: very short, even stubble of about 2-3 mm on the cheeks, jawline, chin and upper lip',
+      'kratka-brada':       'a short boxed beard: neatly trimmed, even length of about 1 cm, sharp clean cheek line and a tidy neckline',
+      'korporativna-brada': 'a corporate beard: neat, conservative, about 1.5-2 cm long, clean cheek and neck lines, trimmed mustache',
+      'puna-brada':         'a full thick beard about 5 cm long, well groomed, rounded at the bottom, connected to the mustache',
+      'kruzna-brada':       'a circle beard: a mustache connected to a rounded goatee around the mouth and chin; cheeks and jaw sides clean-shaven',
+      'kozja-bradica':      'a classic chin goatee: hair only on the chin, no mustache; cheeks, jaw sides and upper lip clean-shaven',
+      'prosirana-kozja':    'an extended goatee: mustache plus a chin beard extending slightly along the lower jaw; upper cheeks and sideburns clean-shaven',
+      'van-dyke':           'a Van Dyke: a styled mustache and a pointed chin beard, not connected to each other; cheeks clean-shaven',
+      'balbo':              'a Balbo: a disconnected mustache plus a chin beard with a soul patch extending slightly along the lower jaw; no sideburns, cheeks clean-shaven',
+      'ducktail':           'a ducktail beard: shorter on the cheeks, longer on the chin, tapering to a point at the bottom, about 6-8 cm at the chin',
+      'garibaldi':          'a Garibaldi beard: a wide, full, rounded beard about 12 cm long with an integrated natural mustache',
+      'zalisci-brkovi':     'mutton chops: thick sideburns running down the cheeks to the jaw corners, connected to the mustache; chin clean-shaven',
+      'sidro':              'an anchor beard: a pointed chin beard tracing the lower jaw, plus a separate mustache; cheeks and sideburns clean-shaven',
+      'verdi':              'a Verdi beard: a full beard about 10 cm long, rounded at the bottom, shorter on the cheeks, with a prominent groomed mustache',
+    };
+    const style = STYLES[styleSlug];
+    if (!style) console.warn(`[Edit] Nema prompta za stil "${styleSlug}", koristim generički opis`);
+    const target = style || `a well-groomed "${String(styleSlug).replace(/-/g, ' ')}" beard style`;
+    return `Edit only the facial hair of the man in this photo. Change his beard into ${target}. ` +
+      `Any area outside this style must be clean-shaven natural skin. ` +
+      `Keep the same natural beard color as the original, including any grey hairs. ` +
+      `Keep the face, identity, eyes, skin, head hair, glasses, clothing, lighting, background and framing exactly the same. ` +
+      `Photorealistic, natural hair texture.`;
+  }
   /**
    * Generate a fast preview (512px, 15 steps) — returns in ~15-20s vs ~55s.
    * Use for instant feedback; user can then request full quality.
