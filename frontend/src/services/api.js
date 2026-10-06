@@ -1,7 +1,7 @@
 import axios from 'axios';
 import useAuthStore from '../context/useAuthStore';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 // Create axios instance
 const api = axios.create({
@@ -67,6 +67,9 @@ export const userAPI = {
   removeFavorite: (styleId) => api.delete(`/user/favorites/${styleId}`),
   getAIAnalysis: (uploadId) => api.get(`/user/analysis/${uploadId}`),
   getMaintenanceTips: (data) => api.post('/user/maintenance-tips', data),
+  getPremiumStatus: () => api.get('/user/premium-status', { timeout: 10000 }),
+  getLessonProgress: () => api.get('/user/lessons/progress', { timeout: 10000 }),
+  completeLesson: (courseId, lessonId) => api.post('/user/lessons/complete', { courseId, lessonId }, { timeout: 10000 }),
 };
 
 // ============================================

@@ -1,0 +1,22 @@
+name: Validate application
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/sync-style-identity.cjs --check
+      - run: node scripts/sync-academy-catalog.cjs --check
+      - run: npm install --ignore-scripts --no-audit --no-fund
+        working-directory: backend
+      - run: npm test -- --runInBand
+        working-directory: backend
+      - run: npm ci --no-audit --no-fund
+        working-directory: frontend
+      - run: npm test -- --watchAll=false --runInBand
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend

@@ -8,6 +8,12 @@ Alat je namijenjen brijačnicama, frizerima i entuzijastima koji žele pronaći 
 
 ## Tehnologije
 
+Upute za razvoj i aktivni katalog stilova nalaze se u [AGENTS.md](AGENTS.md).
+Katalog identiteta sadrži 20 stilova; bosanski ID-evi i engleski slugovi podržani su
+preko zajedničke tabele. Verdi, Bandholz, proširena kozja bradica i francuska vilica
+trenutno prikazuju označene ilustracije u pripremi umjesto crteža drugog stila.
+GitHub Actions provjerava katalog, testove i frontend build.
+
 | Sloj | Stack |
 |---|---|
 | Frontend | React 18, React Router, Tailwind CSS, Zustand |

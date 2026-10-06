@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import stylesData from '../data/styles.json';
+import styleIdentity from '../data/styleIdentity.json';
 import type {
   BeardStyle,
   StylesCatalog,
@@ -81,9 +82,9 @@ export function useBeardStyles() {
   const getStylesWithImages = (): BeardStyleWithImages[] => {
     return styles.map(style => ({
       ...style,
-      imagePath: `/assets/sketches/${style.id}.webp`,
-      thumbnailPath: `/assets/thumbnails/${style.id}-thumb.webp`,
-      imageExists: true // Will be validated at runtime
+      imagePath: styleIdentity.find(s => s.slug === style.id)?.imageUrl || '',
+      thumbnailPath: styleIdentity.find(s => s.slug === style.id)?.imageUrl || '',
+      imageExists: styleIdentity.some(s => s.slug === style.id && s.illustrationAvailable)
     }));
   };
 

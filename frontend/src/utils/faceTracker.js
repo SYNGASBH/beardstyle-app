@@ -34,6 +34,8 @@ import { loadFaceMesh } from './faceShape';
 let _faceMesh = null;
 let _onResults = null;
 let _initPromise = null;
+let _generation = 0;
+let _cancelFrame = null;
 
 const MP_VERSION = '0.4.1633559619';
 const MP_CDN = `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@${MP_VERSION}`;
@@ -58,6 +60,7 @@ export async function initTracker() {
   if (_faceMesh) return _faceMesh;
   if (_initPromise) return _initPromise;
 
+  const generation = _generation;
   _initPromise = (async () => {
     if (!isWebGLAvailable()) {
       console.warn('[FaceTracker] WebGL nedostupan — tracker ne moze raditi bez GPU podrske.');
@@ -65,6 +68,7 @@ export async function initTracker() {
     }
 
     await loadFaceMesh();
+    if (generation !== _generation) throw new Error('Tracking cancelled');
     if (!window.FaceMesh) {
       throw new Error('MediaPipe FaceMesh failed to load from CDN');
     }
@@ -81,22 +85,15 @@ export async function initTracker() {
     });
 
     fm.onResults((results) => {
-      if (_onResults) _onResults(results);
+      if (generation === _generation && _onResults) _onResults(results);
     });
-
-    // Warm up with a small canvas to trigger WASM init
-    const warmup = document.createElement('canvas');
-    warmup.width = 10;
-    warmup.height = 10;
-    try {
-      await fm.send({ image: warmup });
-    } catch (_) {
-      // Warm-up may fail on some browsers — that's OK
-    }
 
     _faceMesh = fm;
     return fm;
-  })();
+  })().catch(error => {
+    if (generation === _generation) _initPromise = null;
+    throw error;
+  });
 
   return _initPromise;
 }
@@ -110,22 +107,37 @@ export async function initTracker() {
  * @returns {Promise<FaceTransform|null>}
  */
 export function processFrame(frame, width, height) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if (!_faceMesh) {
       resolve(null);
       return;
     }
 
-    _onResults = (results) => {
+    const mesh = _faceMesh;
+    let settled = false;
+    const timeout = setTimeout(() => finish(null, new Error('Praćenje lica je isteklo. Pokušaj ponovo.')), 15000);
+    const finish = (result, error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      if (_onResults === onResults) _onResults = null;
+      if (_cancelFrame === cancel) _cancelFrame = null;
+      if (error) reject(error); else resolve(result);
+    };
+    const onResults = (results) => {
       const lms = results.multiFaceLandmarks?.[0];
       if (!lms || lms.length < 468) {
-        resolve(null);
+        finish(null);
         return;
       }
-      resolve(calculateBeardTransform(lms, width, height));
+      finish(calculateBeardTransform(lms, width, height));
     };
-
-    _faceMesh.send({ image: frame }).catch(() => resolve(null));
+    const cancel = () => finish(null);
+    _cancelFrame = cancel;
+    _onResults = onResults;
+    Promise.resolve().then(() => {
+      if (!settled && _faceMesh === mesh) return mesh.send({ image: frame });
+    }).catch(error => finish(null, error));
   });
 }
 
@@ -133,12 +145,14 @@ export function processFrame(frame, width, height) {
  * Clean up the tracker instance.
  */
 export function destroyTracker() {
+  _cancelFrame?.();
+  _generation++;
   if (_faceMesh) {
-    try { _faceMesh.close(); } catch (_) {}
+    try { Promise.resolve(_faceMesh.close()).catch(() => {}); } catch (_) {}
     _faceMesh = null;
-    _initPromise = null;
-    _onResults = null;
   }
+  _initPromise = null;
+  _onResults = null;
 }
 
 // ── Transform Calculation ────────────────────────────────────────────────

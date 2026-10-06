@@ -1,3 +1,4 @@
+import styleIdentity from '../data/styleIdentity.json'
 import stylesData from '../data/styles.json'
 import { BEARD_STYLES, getStylesForShape } from '../data/beardStyles'
 
@@ -11,25 +12,9 @@ const beardStylesById = Object.fromEntries(
 
 // Mapiranje Claude slug-ova na beardStyles id-ove
 // Claude vraca slug poput 'full-beard', a beardStyles koristi 'puna-brada'
-const SLUG_TO_BEARD_ID = {
-  'full-beard':       'puna-brada',
-  'short-boxed':      'kratka-brada',
-  'short-boxed-beard':'kratka-brada',
-  'stubble':          'trodnevna-brada',
-  'stubble-3day':     'trodnevna-brada',
-  'corporate':        'korporativna-brada',
-  'corporate-beard':  'korporativna-brada',
-  'ducktail':         'ducktail',
-  'goatee':           'kozja-bradica',
-  'van-dyke':         'van-dyke',
-  'balbo':            'balbo',
-  'circle-beard':     'kruzna-brada',
-  'garibaldi':        'garibaldi',
-  'mutton-chops':     'zalisci-brkovi',
-  'anchor-beard':     'sidro',
-  'chin-strap':       'sidro',
-  'beardstache':      'verdi',
-}
+const SLUG_TO_BEARD_ID = Object.fromEntries(
+  styleIdentity.flatMap(s => [s.id, s.slug, ...s.aliases].map(alias => [alias, s.id]))
+)
 
 // Mapiranje Claude outputa -> kljucevi face shape
 const SHAPE_ALIASES = {
@@ -128,7 +113,8 @@ export function mergeRecommendations(claudeRawText) {
     const slug = rec.slug || ''
     const beardId = SLUG_TO_BEARD_ID[slug] || slug
     const beardData = beardStylesById[beardId] || null
-    const techData = stylesById[slug] || null
+    const identity = styleIdentity.find(style => style.id === beardId)
+    const techData = stylesById[identity?.slug || slug] || null
 
     return {
       // Unique id for React key + selection
@@ -136,7 +122,7 @@ export function mergeRecommendations(claudeRawText) {
       // Display fields (prefer beardStyles.js, fallback to Claude)
       name:       beardData?.name || rec.styleName,
       shape:      beardData?.shape || slug,
-      imageUrl:   beardData?.imageUrl || null,
+      imageUrl:   beardData?.imageUrl || styleIdentity.find(s => s.id === beardId)?.imageUrl || null,
       desc:       beardData?.desc || rec.reasoning?.slice(0, 100) || '',
       matchLabel: `${rec.matchScore}% poklapanje`,
       why:        beardData?.why || rec.reasoning || '',

@@ -20,6 +20,7 @@
  * Auth: REPLICATE_API_TOKEN in .env
  */
 
+const { requireStyle } = require('../utils/styleIdentity');
 const axios  = require('axios');
 const fs     = require('fs').promises;
 const path   = require('path');
@@ -140,7 +141,7 @@ const STYLE_CONFIG = {
   },
 
   'goatee': {
-    prompt: 'classic goatee beard, chin beard naturally connected to trimmed mustache forming continuous unit, completely clean shaven cheeks and jaw sides, rounded natural bottom shape 2-4cm, moderate thickness with visible hair texture, photorealistic portrait, same person identical face, same lighting and skin tone, high detail',
+    prompt: 'classic chin-only goatee beard, no mustache, completely clean shaven upper lip cheeks and jaw sides, rounded natural bottom shape 2-4cm, moderate thickness with visible hair texture, photorealistic portrait, same person identical face, same lighting and skin tone, high detail',
     strength: 0.88,
     guidance_scale: 8.0,
     neckPad: 0.05,
@@ -397,7 +398,12 @@ class ReplicateService {
    * @returns {Object} { prompt, strength, guidance_scale, neckPad, maskBlur }
    */
   static getStyleConfig(styleSlug) {
-    return STYLE_CONFIG[styleSlug] || { ...DEFAULT_STYLE_CONFIG };
+    const style = requireStyle(styleSlug);
+    const config = STYLE_CONFIG[style.slug];
+    return config ? { ...config } : {
+      ...DEFAULT_STYLE_CONFIG,
+      prompt: this.getEditPrompt(style.id),
+    };
   }
 
   /**
@@ -432,6 +438,7 @@ class ReplicateService {
    * @returns {Promise<Object>}  { imageUrl, localPath, styleSlug, generatedAt, quality, cached }
    */
   static async generateBeardVisualization(imageBase64, maskBase64, styleSlug, options = {}) {
+    styleSlug = requireStyle(styleSlug).slug;
     const { quality = 'full', strengthOverride } = options;
 
     if (process.env.USE_MOCK_AI === 'true') {
@@ -527,6 +534,7 @@ class ReplicateService {
    * Jedan sinhroni poziv (~4 s), originalni kadar, isti oblik odgovora kao inpainting.
    */
   static async generateBeardEdit(imageBase64, styleSlug) {
+    styleSlug = requireStyle(styleSlug).slug;
     const EDIT_MODEL = 'google/nano-banana-2-lite';
     const t0 = Date.now();
 
@@ -598,11 +606,20 @@ class ReplicateService {
       'balbo':              'a Balbo: a disconnected mustache plus a chin beard with a soul patch extending slightly along the lower jaw; no sideburns, cheeks clean-shaven',
       'ducktail':           'a ducktail beard: shorter on the cheeks, longer on the chin, tapering to a point at the bottom, about 6-8 cm at the chin',
       'garibaldi':          'a Garibaldi beard: a wide, full, rounded beard about 12 cm long with an integrated natural mustache',
-      'zalisci-brkovi':     'mutton chops: thick sideburns running down the cheeks to the jaw corners, connected to the mustache; chin clean-shaven',
+      'zalisci-brkovi':     'mutton chops: thick sideburns running down the cheeks to the jaw corners; chin and upper lip clean-shaven, no mustache',
       'sidro':              'an anchor beard: a pointed chin beard tracing the lower jaw, plus a separate mustache; cheeks and sideburns clean-shaven',
       'verdi':              'a Verdi beard: a full beard about 10 cm long, rounded at the bottom, shorter on the cheeks, with a prominent groomed mustache',
     };
-    const style = STYLES[styleSlug];
+    Object.assign(STYLES, {
+      'chin-strap': 'a narrow chin strap along the jawline, no mustache; cheeks and upper lip clean-shaven',
+      'beardstache': 'a prominent thick mustache over very short 2-3 mm stubble on the cheeks, jaw and chin',
+      'clean-shaven': 'a completely clean-shaven face without any facial hair or stubble',
+      'handlebar': 'a handlebar mustache with curled upward tips; chin, cheeks and jaw clean-shaven',
+      'bandholz': 'a long, naturally flowing full Bandholz beard with a full connected mustache',
+      'francuska-vilica': 'a full French fork beard split into two distinct points at the bottom',
+    });
+    const identity = requireStyle(styleSlug);
+    const style = STYLES[identity.id];
     if (!style) console.warn(`[Edit] Nema prompta za stil "${styleSlug}", koristim generički opis`);
     const target = style || `a well-groomed "${String(styleSlug).replace(/-/g, ' ')}" beard style`;
     return `Edit only the facial hair of the man in this photo. Change his beard into ${target}. ` +
@@ -657,16 +674,16 @@ class ReplicateService {
   }
 
   static getMockVisualization(styleSlug) {
-    // Use the actual sketch image that exists in frontend/public/assets/sketches/
-    // This prevents 404 errors in mock mode
+    const style = requireStyle(styleSlug);
     return {
-      imageUrl:    `/assets/sketches/${styleSlug}.webp`,
-      localPath:   `uploads/mock-${styleSlug}.webp`,
+      imageUrl:    style.imageUrl,
+      localPath:   null,
       styleSlug,
       model:       'mock-replicate',
       quality:     'full',
       generatedAt: new Date().toISOString(),
       isMock:      true,
+      illustrationAvailable: style.illustrationAvailable,
     };
   }
 }

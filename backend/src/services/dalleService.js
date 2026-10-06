@@ -3,10 +3,12 @@ const fs = require('fs').promises;
 const path = require('path');
 const axios = require('axios');
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const { requireStyle } = require('../utils/styleIdentity');
+let openai;
+function getOpenAI() {
+  if (!openai) openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return openai;
+}
 
 class DalleService {
   /**
@@ -44,7 +46,7 @@ class DalleService {
       console.log(`🎨 Generating beard visualization for style: ${style.name}`);
 
       // Call DALL-E API with image variation/edit
-      const response = await openai.images.generate({
+      const response = await getOpenAI().images.generate({
         model: "dall-e-3",
         prompt: prompt,
         n: 1,
@@ -175,10 +177,11 @@ Centered composition.`;
    * @returns {Object} Mock visualization data
    */
   static getMockVisualization(style) {
+    const identity = requireStyle(style.slug || style.id);
     return {
       success: true,
-      imageUrl: `/assets/mock-beard-${style.slug || 'default'}.jpg`,
-      localPath: `uploads/mock-${style.id}.jpg`,
+      imageUrl: identity.imageUrl,
+      localPath: null,
       model: 'mock-dall-e',
       prompt: `Mock visualization for ${style.name}`,
       generatedAt: new Date().toISOString(),

@@ -1,0 +1,148 @@
+[
+  {
+    "id": "kratka-brada",
+    "slug": "short-boxed-beard",
+    "aliases": [
+      "short-boxed"
+    ],
+    "imageUrl": "/assets/sketches/short-boxed-beard.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "ducktail",
+    "slug": "ducktail",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/ducktail.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "trodnevna-brada",
+    "slug": "stubble-3day",
+    "aliases": [
+      "stubble"
+    ],
+    "imageUrl": "/assets/sketches/stubble-3day.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "puna-brada",
+    "slug": "full-beard",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/full-beard.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "kozja-bradica",
+    "slug": "goatee",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/goatee.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "prosirana-kozja",
+    "slug": "extended-goatee",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/extended-goatee.svg",
+    "illustrationAvailable": false
+  },
+  {
+    "id": "van-dyke",
+    "slug": "van-dyke",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/van-dyke.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "balbo",
+    "slug": "balbo",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/balbo.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "kruzna-brada",
+    "slug": "circle-beard",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/circle-beard.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "garibaldi",
+    "slug": "garibaldi",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/garibaldi.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "verdi",
+    "slug": "verdi",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/verdi.svg",
+    "illustrationAvailable": false
+  },
+  {
+    "id": "sidro",
+    "slug": "anchor-beard",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/anchor-beard.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "korporativna-brada",
+    "slug": "corporate-beard",
+    "aliases": [
+      "corporate"
+    ],
+    "imageUrl": "/assets/sketches/corporate-beard.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "zalisci-brkovi",
+    "slug": "mutton-chops",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/mutton-chops.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "bandholz",
+    "slug": "bandholz",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/bandholz.svg",
+    "illustrationAvailable": false
+  },
+  {
+    "id": "francuska-vilica",
+    "slug": "french-fork",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/french-fork.svg",
+    "illustrationAvailable": false
+  },
+  {
+    "id": "chin-strap",
+    "slug": "chin-strap",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/chin-strap.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "beardstache",
+    "slug": "beardstache",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/beardstache.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "clean-shaven",
+    "slug": "clean-shaven",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/clean-shaven.webp",
+    "illustrationAvailable": true
+  },
+  {
+    "id": "handlebar",
+    "slug": "handlebar",
+    "aliases": [],
+    "imageUrl": "/assets/sketches/handlebar.webp",
+    "illustrationAvailable": true
+  }
+]

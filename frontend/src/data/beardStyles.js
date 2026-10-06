@@ -1,4 +1,7 @@
-export const BEARD_STYLES = [
+import styleIdentity from './styleIdentity.json'
+import stylesData from './styles.json'
+
+const displayStyles = [
   {
     id: 'kratka-brada',
     name: 'Kratka uredna brada',
@@ -222,10 +225,10 @@ export const BEARD_STYLES = [
   },
   {
     id: 'zalisci-brkovi',
-    name: 'Zalisci i brkovi (Mutton Chops)',
+    name: 'Zalisci (Mutton Chops)',
     shape: 'mutton-chops',
     imageUrl: '/assets/sketches/mutton-chops.webp',
-    desc: 'Gusti zalisci koji se spajaju s brkovima, s obrijanom sredinom brade.',
+    desc: 'Gusti zalisci uz obrijanu sredinu brade i gornju usnu, bez brkova.',
     matchLabel: 'Odlično za Okruglo i Srcoliko lice',
     why: 'Razbija okrugle konture lica upečatljivim bočnim profilom.',
     pros: ['Ekstremno hrabar izbor', 'Nezaboravan izgled', 'Wolverine estetika'],
@@ -272,6 +275,24 @@ export const BEARD_STYLES = [
     recommendedFor: ['diamond', 'triangle', 'round'],
   },
 ]
+
+export const BEARD_STYLES = styleIdentity.map(identity => {
+  const display = displayStyles.find(style => style.id === identity.id)
+  const technical = stylesData.styles.find(style => style.id === identity.slug)
+  return {
+    name: technical?.name || identity.slug.replace(/-/g, ' '),
+    shape: identity.slug,
+    desc: technical?.rules.must.join('; ') || '',
+    matchLabel: '',
+    why: '',
+    pros: [],
+    cons: [],
+    maintenance: {},
+    recommendedFor: [],
+    ...display,
+    ...identity,
+  }
+})
 
 // Lookup by id for O(1) access
 export const BEARD_STYLES_MAP = Object.fromEntries(

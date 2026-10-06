@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const { body } = require('express-validator');
 const User = require('../models/User');
+const academyLessons = require('../data/academyLessons.json');
 const { authenticateToken, authenticateUser } = require('../middleware/auth');
 const ClaudeService = require('../services/claudeService');
 const { convertVariants } = require('../utils/convertToWebpMagick');
@@ -425,6 +426,12 @@ router.post('/lessons/complete', authenticateToken, authenticateUser, async (req
 
     if (!courseId || !lessonId) {
       return res.status(400).json({ error: 'courseId and lessonId are required' });
+    }
+
+    if (typeof courseId !== 'string' || typeof lessonId !== 'string' ||
+        !Object.prototype.hasOwnProperty.call(academyLessons, courseId) ||
+        !academyLessons[courseId].includes(lessonId)) {
+      return res.status(400).json({ error: 'Unknown course or lesson' });
     }
 
     const result = await User.completeLesson(req.user.userId, courseId, lessonId);

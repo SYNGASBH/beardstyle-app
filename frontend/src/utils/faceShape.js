@@ -22,8 +22,15 @@ export const loadFaceMesh = () => {
     const s = document.createElement('script');
     s.src = `${MP_CDN}/face_mesh.js`;
     s.crossOrigin = 'anonymous';
-    s.onload  = resolve;
-    s.onerror = resolve; // fail silently — Claude is the fallback
+    const timeout = setTimeout(() => finish(false), 20000);
+    const finish = success => {
+      clearTimeout(timeout);
+      s.onload = null; s.onerror = null;
+      if (!success) { _loadPromise = null; s.remove(); }
+      resolve();
+    };
+    s.onload = () => finish(!!window.FaceMesh);
+    s.onerror = () => finish(false); // upload retains its Claude fallback
     document.head.appendChild(s);
   });
   return _loadPromise;

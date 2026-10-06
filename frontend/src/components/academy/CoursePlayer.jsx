@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
+import coursesData from '../../data/academyCourses.json';
 import AnimatedGuide from './AnimatedGuide';
 import './CoursePlayer.css';
 
@@ -36,121 +37,29 @@ const planClass = (plan) =>
   plan === 'premium' ? 'cp-plan-badge cp-plan-premium' : 'cp-plan-badge cp-plan-free';
 
 // ─── Course data ──────────────────────────────────────────────────
-const COURSES = [
-  {
-    id: 'beard-basics',
-    title: 'Osnove njege brade',
-    description: 'Kako pravilno održavati, trimati i oblikovati bradu od nule.',
-    level: 'Početnik',
-    plan: 'free',
-    totalDuration: '25 min',
-    thumbnail: 'basics',
-    lessons: [
-      { id: 'bb1', type: 'guide', guideId: 'full-beard', title: 'Kako oblikovati punu bradu', duration: '10 min', plan: 'free' },
-      { id: 'bb2', type: 'guide', guideId: 'goatee', title: 'Goatee — korak po korak', duration: '8 min', plan: 'free' },
-      {
-        id: 'bb3', type: 'tips', title: 'Alati za bradu — šta ti treba', duration: '5 min', plan: 'free',
-        content: { sections: [
-          { heading: 'Obavezni alati', text: 'Kvalitetan trimer sa podesivom dužinom, brijač (safety razor ili straight), četka za bradu od divlje svinje, i fino ulje za bradu.' },
-          { heading: 'Trimer vs makaze', text: 'Trimer za jednoliku dužinu i linije. Makaze za precizno dotjerivanje pojedinačnih dlaka koje strše. Idealno — koristi oboje.' },
-          { heading: 'Njega kože ispod brade', text: 'Koža ispod brade treba hidrataciju. Koristi ulje za bradu svaki dan — ono hrani i kožu i dlaku. Peeling jednom sedmično sprječava urasle dlake.' },
-        ]},
-      },
-    ],
-  },
-  {
-    id: 'precision-styles',
-    title: 'Precizni stilovi',
-    description: 'Van Dyke, Balbo i drugi stilovi koji zahtijevaju preciznost.',
-    level: 'Napredno',
-    plan: 'premium',
-    totalDuration: '30 min',
-    thumbnail: 'advanced',
-    lessons: [
-      { id: 'ps1', type: 'guide', guideId: 'van-dyke', title: 'Van Dyke — masterclass', duration: '12 min', plan: 'premium' },
-      {
-        id: 'ps2', type: 'tips', title: 'Kako održavati simetriju', duration: '6 min', plan: 'premium',
-        content: { sections: [
-          { heading: 'Ogledalo je tvoj prijatelj', text: 'Koristi dva ogledala — jedno ispred, jedno sa strane. Provjeri profil s obje strane nakon svakog koraka.' },
-          { heading: 'Marka i mjeri', text: 'Prije brijanja, koristi bijelu olovku ili eye-liner da označiš linije. To daje vizualni vodič i sprječava greške.' },
-          { heading: 'Manje je više', text: 'Uvijek brij manje nego što misliš da treba. Lakše je skinuti još malo nego čekati da naraste.' },
-        ]},
-      },
-      {
-        id: 'ps3', type: 'tips', title: 'Balbo i Anchor — razlike i tehnike', duration: '8 min', plan: 'premium',
-        content: { sections: [
-          { heading: 'Balbo', text: 'Brkovi su odvojeni od brade. Nema dlaka na obrazima. Brada pokriva samo bradu i donju vilicu — ali ne spaja se sa brkovima.' },
-          { heading: 'Anchor', text: 'Tanka linija duž vilice sa bradičnom na vrhu. Izgleda kao sidro. Zahtijeva precizni trimer i strpljenje.' },
-          { heading: 'Zajednički savjet', text: 'Oba stila zahtijevaju svakodnevno održavanje ivica. Investiraj u dobar precizni trimer — isplati se.' },
-        ]},
-      },
-    ],
-  },
-  {
-    id: 'beard-care',
-    title: 'Njega i proizvodi',
-    description: 'Ulja, balzami, šamponi — za zdravu, sjajnu bradu.',
-    level: 'Početnik',
-    plan: 'free',
-    totalDuration: '15 min',
-    thumbnail: 'care',
-    lessons: [
-      {
-        id: 'bc1', type: 'tips', title: 'Ulje za bradu — vodič', duration: '5 min', plan: 'free',
-        content: { sections: [
-          { heading: 'Zašto ulje?', text: 'Ulje za bradu hidratizira kožu ispod brade i omekšava dlake. Smanjuje svrbež, perut i suhoću.' },
-          { heading: 'Kako nanijeti', text: '3-5 kapi na dlanove, razmaži i umasiraj od korijena prema vrhovima. Najbolje na vlažnu bradu nakon tuširanja.' },
-          { heading: 'Koji sastojci', text: 'Traži jojoba ulje, arganovo ulje ili kokosovo ulje kao bazu. Izbjegavaj silikonske dodatke.' },
-        ]},
-      },
-      {
-        id: 'bc2', type: 'tips', title: 'Balzam vs ulje — kad šta', duration: '4 min', plan: 'free',
-        content: { sections: [
-          { heading: 'Ulje', text: 'Za kratke do srednje brade. Glavna svrha: hidratacija kože i dlake. Ne daje hold.' },
-          { heading: 'Balzam', text: 'Za srednje do duge brade. Daje blagi hold i oblik. Sadrži pčelinji vosak koji drži formu.' },
-          { heading: 'Kombinacija', text: 'Za duge brade: ulje prvo (hidratacija), pa balzam preko (forma). Ovo je zlatni standard.' },
-        ]},
-      },
-      {
-        id: 'bc3', type: 'tips', title: 'Pranje brade — greške koje svi rade', duration: '4 min', plan: 'premium',
-        content: { sections: [
-          { heading: 'Ne koristi šampon za kosu', text: 'Šampon za kosu je pregrub za bradu. Koristi specijalni beard wash ili blagi sulfate-free šampon.' },
-          { heading: 'Koliko često', text: '2-3 puta sedmično je dovoljno. Svakodnevno pranje isušuje kožu i dlaku.' },
-          { heading: 'Sušenje', text: 'Tapkaj ručnikom — ne trljaj. Trljanje uzrokuje frizz i lomljenje dlaka.' },
-        ]},
-      },
-    ],
-  },
-];
+const COURSES = coursesData;
 
 // ─── CoursePlayer Component ───────────────────────────────────────
-const CoursePlayer = ({ isPremium = false, onUpgrade }) => {
+const CoursePlayer = ({ isPremium = false, onUpgrade, openAccess = false, completedLessons = {}, onCompleteLesson }) => {
+  const hasAccess = openAccess || isPremium;
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [selectedLessonId, setSelectedLessonId] = useState(null);
-  const [completedLessons, setCompletedLessons] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('bs_progress') || '{}'); }
-    catch { return {}; }
-  });
-
-  useEffect(() => {
-    localStorage.setItem('bs_progress', JSON.stringify(completedLessons));
-  }, [completedLessons]);
 
   const selectedCourse = COURSES.find(c => c.id === selectedCourseId);
   const selectedLesson = selectedCourse?.lessons.find(l => l.id === selectedLessonId);
 
-  const canAccessCourse = useCallback((course) => isPremium || course.plan === 'free', [isPremium]);
-  const canAccessLesson = useCallback((lesson) => isPremium || lesson.plan === 'free', [isPremium]);
+  const canAccessCourse = useCallback((course) => hasAccess || course.plan === 'free', [hasAccess]);
+  const canAccessLesson = useCallback((lesson) => hasAccess || lesson.plan === 'free', [hasAccess]);
 
   const getCourseProgress = useCallback((course) => {
-    const accessible = course.lessons.filter(l => isPremium || l.plan === 'free');
+    const accessible = course.lessons.filter(l => hasAccess || l.plan === 'free');
     const completed = accessible.filter(l => completedLessons[l.id]);
     return accessible.length > 0 ? Math.round((completed.length / accessible.length) * 100) : 0;
-  }, [completedLessons, isPremium]);
+  }, [completedLessons, hasAccess]);
 
   const completeLesson = useCallback((lessonId) => {
-    setCompletedLessons(prev => ({ ...prev, [lessonId]: true }));
-  }, []);
+    onCompleteLesson?.(selectedCourseId, lessonId);
+  }, [onCompleteLesson, selectedCourseId]);
 
   const openCourse = useCallback((courseId) => {
     setSelectedCourseId(courseId);
@@ -199,8 +108,9 @@ const CoursePlayer = ({ isPremium = false, onUpgrade }) => {
             {selectedLesson.type === 'guide' && (
               <div className="cp-guide-wrap">
                 <AnimatedGuide
+                  key={selectedLesson.guideId}
                   guideId={selectedLesson.guideId}
-                  isPremium={isPremium}
+                  isPremium={hasAccess}
                   onUpgrade={onUpgrade}
                 />
               </div>
@@ -268,7 +178,7 @@ const CoursePlayer = ({ isPremium = false, onUpgrade }) => {
             <div className="cp-hero-meta">
               <span className={levelClass(selectedCourse.level)}>{selectedCourse.level}</span>
               <span className={planClass(selectedCourse.plan)}>
-                {selectedCourse.plan === 'premium' ? 'Premium' : 'Besplatno'}
+                {openAccess ? 'Besplatno' : selectedCourse.plan === 'premium' ? 'Premium' : 'Besplatno'}
               </span>
             </div>
             <div className="cp-hero-meta">
@@ -300,6 +210,7 @@ const CoursePlayer = ({ isPremium = false, onUpgrade }) => {
                 key={lesson.id}
                 className={`cp-lesson-row ${done ? 'cp-lesson-done' : ''} ${locked ? 'cp-lesson-locked' : ''}`}
                 onClick={() => !locked && openLesson(lesson.id)}
+                onKeyDown={event => { if (!locked && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); openLesson(lesson.id); } }}
                 role="button"
                 tabIndex={locked ? -1 : 0}
               >
@@ -325,7 +236,7 @@ const CoursePlayer = ({ isPremium = false, onUpgrade }) => {
         </div>
 
         {/* Upgrade CTA */}
-        {!isPremium && hasPremiumLessons && (
+        {!hasAccess && hasPremiumLessons && (
           <div className="cp-course-upgrade">
             <p>Otključaj sve lekcije ovog kursa</p>
             {onUpgrade && (
@@ -338,7 +249,7 @@ const CoursePlayer = ({ isPremium = false, onUpgrade }) => {
   }
 
   // ─── Course List (Home) ─────────────────────────────────────────
-  const showUpgrade = !isPremium && COURSES.some(c => c.plan === 'premium');
+  const showUpgrade = !hasAccess && COURSES.some(c => c.plan === 'premium');
 
   return (
     <div className="cp-root">
@@ -373,6 +284,7 @@ const CoursePlayer = ({ isPremium = false, onUpgrade }) => {
               key={course.id}
               className={`cp-course-card ${locked ? 'cp-course-locked' : ''}`}
               onClick={() => locked ? onUpgrade?.() : openCourse(course.id)}
+              onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); if (locked) onUpgrade?.(); else openCourse(course.id); } }}
               role="button"
               tabIndex={0}
             >
@@ -384,7 +296,7 @@ const CoursePlayer = ({ isPremium = false, onUpgrade }) => {
                 <div className="cp-course-meta-row">
                   <span className={levelClass(course.level)}>{course.level}</span>
                   <span className={planClass(course.plan)}>
-                    {course.plan === 'premium' ? 'Premium' : 'Besplatno'}
+                    {openAccess ? 'Besplatno' : course.plan === 'premium' ? 'Premium' : 'Besplatno'}
                   </span>
                 </div>
                 <div className="cp-course-title">{course.title}</div>

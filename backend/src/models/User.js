@@ -238,7 +238,7 @@ class User {
     const result = await query(
       `INSERT INTO user_lesson_progress (user_id, course_id, lesson_id)
        VALUES ($1, $2, $3)
-       ON CONFLICT (user_id, lesson_id) DO NOTHING
+       ON CONFLICT (user_id, lesson_id) DO UPDATE SET course_id = EXCLUDED.course_id
        RETURNING *`,
       [userId, courseId, lessonId]
     );

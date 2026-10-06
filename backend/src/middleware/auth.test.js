@@ -30,10 +30,10 @@ describe('authenticateToken', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  test('returns 403 for invalid token', () => {
+  test('returns 401 for invalid token', () => {
     const { req, res, next } = mockReqRes('invalid.token.here');
     authenticateToken(req, res, next);
-    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.status).toHaveBeenCalledWith(401);
     expect(next).not.toHaveBeenCalled();
   });
 

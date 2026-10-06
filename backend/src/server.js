@@ -75,12 +75,13 @@ app.use('/uploads', (req, res, next) => {
 // ============================================
 
 // Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
+app.get('/health', async (req, res) => {
+  try {
+    await pool.query({ text: 'SELECT 1', query_timeout: 3000 });
+    res.json({ status: 'OK', database: 'OK', timestamp: new Date().toISOString(), uptime: process.uptime() });
+  } catch (_) {
+    res.status(503).json({ status: 'unavailable', database: 'unavailable', timestamp: new Date().toISOString() });
+  }
 });
 
 // API routes
@@ -125,12 +126,16 @@ app.use(errorHandler);
 // Test database connection before starting server
 const { pool } = require('./config/database');
 
+let server;
+let shuttingDown = false;
+
 pool.query('SELECT NOW()')
   .then(() => {
+    if (shuttingDown) return;
     console.log('✅ Database connection successful');
     
     // Start server
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       console.log(`
 ╔═══════════════════════════════════════════════════╗
 ║  Beard Style Advisor API Server                  ║
@@ -147,15 +152,18 @@ pool.query('SELECT NOW()')
   });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
-  app.close(() => {
-    console.log('HTTP server closed');
-    pool.end(() => {
-      console.log('Database pool closed');
-      process.exit(0);
-    });
-  });
-});
+function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  const timeout = setTimeout(() => process.exit(1), 10000);
+  timeout.unref();
+  const finish = async () => {
+    try { await pool.end(); clearTimeout(timeout); process.exit(0); }
+    catch (error) { console.error('Shutdown failed:', error); process.exit(1); }
+  };
+  if (server) server.close(finish); else finish();
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 module.exports = app;
