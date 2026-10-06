@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../services/api';
 import useAuthStore from '../context/useAuthStore';
 import { detectFaceShape, loadFaceMesh } from '../utils/faceShape';
+import FaceGuideOverlay from '../components/FaceGuideOverlay';
+import FacePlacementGuide from '../components/FacePlacementGuide';
 
 const SHAPE_LABELS = {
   oval:        { label: 'Oval',         color: 'bg-green-100 text-green-800'  },
@@ -41,6 +43,12 @@ const UploadPage = () => {
   const [stream, setStream]                       = useState(null);
   const [detectedFaceShape, setDetectedFaceShape] = useState(null);
   const [faceShapeDetecting, setFaceShapeDetecting] = useState(false);
+  const [alignment, setAlignment]                 = useState(null);
+  const streamRef = useRef(null);
+  streamRef.current = stream;
+
+  // Camera must never outlive the page
+  useEffect(() => () => streamRef.current?.getTracks().forEach(track => track.stop()), []);
 
   // Run local FaceMesh detection on a data-URL image
   const runFaceDetection = (dataUrl) => {
@@ -124,14 +132,22 @@ const UploadPage = () => {
   // Camera functions
   const startCamera = async () => {
     try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error('Kamera zahtijeva HTTPS ili localhost i podržan preglednik.');
+      }
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user' },
+        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
+        audio: false,
       });
+      setAlignment(null);
       setStream(mediaStream);
       setUseCamera(true);
       setError(null);
     } catch (err) {
-      setError('Ne mogu pristupiti kameri. Provjerite dozvole.');
+      setError(err.name === 'NotAllowedError'
+        ? 'Pristup kameri je odbijen. Dozvolite kameru u postavkama preglednika.'
+        : err.name === 'NotFoundError' ? 'Kamera nije pronađena. Učitajte fotografiju umjesto toga.'
+        : 'Ne mogu pristupiti kameri. Provjerite dozvole.');
       console.error('Camera error:', err);
     }
   };
@@ -296,13 +312,30 @@ const UploadPage = () => {
       {/* Camera View */}
       {useCamera && (
         <div className="space-y-4">
+          {/* Mirrored like a selfie mirror; the captured photo stays unmirrored */}
           <div className="relative bg-black rounded-lg overflow-hidden">
-            <video ref={videoRef} className="w-full" autoPlay playsInline muted />
+            <div className="relative" style={{ transform: 'scaleX(-1)' }}>
+              <video ref={videoRef} className="w-full block" autoPlay playsInline muted aria-label="Kamera" />
+              <FaceGuideOverlay videoRef={videoRef} onAlignmentChange={setAlignment} />
+            </div>
           </div>
+          <p
+            role="status"
+            className={`text-center font-medium min-h-[1.5rem] ${
+              alignment?.aligned ? 'text-green-700' : 'text-amber-700'
+            }`}
+          >
+            {alignment?.message
+              || (alignment?.status === 'unavailable'
+                ? 'Automatska provjera nije dostupna — poravnajte lice s ovalom prema uputama ispod.'
+                : 'Postavite lice u oval: oči na isprekidanoj liniji, brada na donjem rubu.')}
+          </p>
           <div className="flex gap-4 justify-center">
             <button
               onClick={capturePhoto}
-              className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors"
+              className={`text-white px-6 py-3 rounded-lg transition-colors ${
+                alignment?.aligned ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
+              }`}
             >
               📸 Uslikaj
             </button>
@@ -365,16 +398,8 @@ const UploadPage = () => {
         </div>
       )}
 
-      {/* Tips */}
-      <div className="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="font-bold mb-3">💡 Savjeti za najbolje rezultate:</h3>
-        <ul className="space-y-2 text-sm text-gray-700">
-          <li>✓ Koristite dobro osvijetljenu fotografiju</li>
-          <li>✓ Gledajte direktno u kameru</li>
-          <li>✓ Uklonite naočare ili maske</li>
-          <li>✓ Izraz lica treba biti neutralan</li>
-        </ul>
-      </div>
+      {/* Face placement guide */}
+      <FacePlacementGuide />
     </div>
   );
 };
