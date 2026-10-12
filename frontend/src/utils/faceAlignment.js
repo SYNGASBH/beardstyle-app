@@ -22,10 +22,15 @@ export const LIMITS = {
   maxFill: 1.0,
   roll: 7,           // degrees
   yaw: 12,
-  pitch: 12,
+  pitch: 12,         // allowed deviation from PITCH_NEUTRAL
   minBrightness: 70, // mean luma 0–255
   maxBrightness: 225,
 };
+
+// faceTracker's pitch (nose-tip vs chin depth) is not zero for a frontal face:
+// the nose protrudes further than the chin. Measured on real frontal captures
+// (laptop webcam 1280×720 and phone 1200×896): −13.7° to −16.5°.
+export const PITCH_NEUTRAL = -15;
 
 export const HINTS = {
   noFace: 'Lice nije pronađeno — postavite lice u oval.',
@@ -69,7 +74,7 @@ export function evaluateAlignment(face, width, height, brightness) {
   if (fill > LIMITS.maxFill) return result('tooClose');
   if (Math.abs(face.roll) > LIMITS.roll) return result('roll');
   if (Math.abs(face.yaw) > LIMITS.yaw) return result('yaw');
-  if (Math.abs(face.pitch) > LIMITS.pitch) return result('pitch');
+  if (Math.abs(face.pitch - PITCH_NEUTRAL) > LIMITS.pitch) return result('pitch');
   if (brightness != null && brightness < LIMITS.minBrightness) return result('dark');
   if (brightness != null && brightness > LIMITS.maxBrightness) return result('bright');
   return result('ok');

@@ -1,4 +1,4 @@
-import { evaluateAlignment, guideOval, HINTS } from './faceAlignment';
+import { evaluateAlignment, guideOval, HINTS, PITCH_NEUTRAL } from './faceAlignment';
 
 const W = 1280, H = 960;
 // Build a FaceTransform that sits exactly inside the guide oval.
@@ -7,7 +7,7 @@ const face = (overrides = {}, fill = 0.85) => {
   const faceHeight = oval.ry * 2 * fill;
   const chinY = oval.cy + faceHeight / 2;
   return {
-    confidence: 1, roll: 0, yaw: 0, pitch: 0, faceHeight,
+    confidence: 1, roll: 0, yaw: 0, pitch: PITCH_NEUTRAL, faceHeight,
     noseTip: { x: oval.cx, y: oval.cy },
     chinTip: { x: oval.cx, y: chinY },
     ...overrides,
@@ -31,11 +31,19 @@ test('distance, position and pose each produce their own hint', () => {
   expect(evaluateAlignment(face({}, 1.1), W, H).status).toBe('tooClose');
   expect(evaluateAlignment(face({ roll: 12 }), W, H).status).toBe('roll');
   expect(evaluateAlignment(face({ yaw: -20 }), W, H).status).toBe('yaw');
-  expect(evaluateAlignment(face({ pitch: 18 }), W, H).status).toBe('pitch');
+  expect(evaluateAlignment(face({ pitch: PITCH_NEUTRAL + 18 }), W, H).status).toBe('pitch');
+  expect(evaluateAlignment(face({ pitch: PITCH_NEUTRAL - 18 }), W, H).status).toBe('pitch');
 });
 
 test('lighting is checked only when measured', () => {
   expect(evaluateAlignment(face(), W, H, 30).status).toBe('dark');
   expect(evaluateAlignment(face(), W, H, 250).status).toBe('bright');
   expect(evaluateAlignment(face(), W, H, undefined).status).toBe('ok');
+});
+
+test('frontal faces measured on real devices are accepted', () => {
+  // Tracker pitch from real frontal captures (webcam and phone); head was level in all of them.
+  for (const pitch of [-13.7, -14.8, -15.9, -16.5]) {
+    expect(evaluateAlignment(face({ pitch }), W, H).status).toBe('ok');
+  }
 });
