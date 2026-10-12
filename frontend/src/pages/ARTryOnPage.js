@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ARBeardOverlay from '../components/ARBeardOverlay';
 import { BEARD_STYLES } from '../data/beardStyles';
-import { AR_SHAPES, captureARFrame } from '../utils/arPreview';
+import { AR_SHAPES, BEARD_COLORS, captureARFrame } from '../utils/arPreview';
 
 const styles = BEARD_STYLES.filter(style => AR_SHAPES[style.slug]);
 
@@ -22,7 +22,8 @@ export default function ARTryOnPage() {
   const [trackingError, setTrackingError] = useState('');
   const [visible, setVisible] = useState(true);
   const [techLines, setTechLines] = useState(false);
-  const [opacity, setOpacity] = useState(0.75);
+  const [opacity, setOpacity] = useState(0.85);
+  const [color, setColor] = useState('dark-brown');
   const [blueprint, setBlueprint] = useState(null);
   const [split, setSplit] = useState(50);
   const [message, setMessage] = useState('');
@@ -112,7 +113,7 @@ export default function ARTryOnPage() {
         <div className="relative aspect-video bg-black rounded-2xl overflow-hidden">
           <div className="absolute inset-0" style={{ transform: 'scaleX(-1)' }}>
             <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-contain" aria-label="Kamera za AR" />
-            {ready && <ARBeardOverlay ref={overlayRef} videoRef={videoRef} beardStyle={slug} opacity={opacity}
+            {ready && <ARBeardOverlay ref={overlayRef} videoRef={videoRef} beardStyle={slug} beardColor={color} opacity={opacity}
               visible={visible} showTechLines={techLines} onFaceDetected={onFace} onTrackingLost={onLost} onError={setTrackingError} />}
           </div>
           {!ready && <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4 text-center bg-gray-900/80">
@@ -128,6 +129,11 @@ export default function ARTryOnPage() {
         <label className="block">Stil brade
           <select value={slug} onChange={e => { setSlug(e.target.value); faceRef.current = null; setTracking(false); }} className="block w-full bg-gray-800 rounded-lg p-3 mt-2">
             {styles.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+          </select>
+        </label>
+        <label className="block">Boja brade
+          <select value={color} onChange={e => setColor(e.target.value)} className="block w-full bg-gray-800 rounded-lg p-3 mt-2">
+            {Object.entries(BEARD_COLORS).map(([key, c]) => <option key={key} value={key}>{c.label}</option>)}
           </select>
         </label>
         <div className="flex flex-wrap items-center gap-5">

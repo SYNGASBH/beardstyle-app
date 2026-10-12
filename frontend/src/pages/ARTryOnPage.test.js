@@ -30,7 +30,7 @@ const showPage = () => render(<MemoryRouter future={{ v7_startTransition: true, 
 test('camera starts on request, captures overlay, stops and restarts for retake', async () => {
   const { unmount } = showPage();
   expect(getUserMedia).not.toHaveBeenCalled();
-  expect(screen.getByRole('combobox').value).toBe('full-beard');
+  expect(screen.getByLabelText('Stil brade').value).toBe('full-beard');
   fireEvent.click(screen.getByText('Pokreni kameru'));
   await waitFor(() => expect(screen.getByText('Snimi prikaz').disabled).toBe(false));
   fireEvent.click(screen.getByText('Snimi prikaz'));
