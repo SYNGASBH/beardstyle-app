@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import ARBeardOverlay from '../components/ARBeardOverlay';
 import { BEARD_STYLES } from '../data/beardStyles';
 import { AR_SHAPES, BEARD_COLORS, captureARFrame } from '../utils/arPreview';
+import { stylesAPI } from '../services/api';
 
 const styles = BEARD_STYLES.filter(style => AR_SHAPES[style.slug]);
 
@@ -27,6 +28,11 @@ export default function ARTryOnPage() {
   const [blueprint, setBlueprint] = useState(null);
   const [split, setSplit] = useState(50);
   const [message, setMessage] = useState('');
+  // Realistic AI render of the captured frame: { status: idle|loading|done|error, url, error, mock }
+  const [ai, setAi] = useState({ status: 'idle' });
+  const [view, setView] = useState('ar');
+  const aiRequest = useRef(0);
+  useEffect(() => () => { aiRequest.current += 1; }, []);
 
   useEffect(() => {
     if (!attempt || blueprint) return;
@@ -69,16 +75,35 @@ export default function ARTryOnPage() {
     if (!ready || !faceRef.current) return;
     try {
       const frames = captureARFrame(videoRef.current, visible ? overlayRef.current?.getCanvas() : null);
-      setBlueprint({ ...frames, name: style.name, slug }); setMessage(''); setSplit(50);
+      setBlueprint({ ...frames, name: style.name, slug }); setMessage(''); setSplit(50); resetAi();
     } catch (error) { setMessage(error.message); }
   };
+  function resetAi() { aiRequest.current += 1; setAi({ status: 'idle' }); setView('ar'); }
+  const generateAi = async () => {
+    const request = ++aiRequest.current;
+    setAi({ status: 'loading' }); setMessage('');
+    try {
+      const { data } = await stylesAPI.generateRealistic(blueprint.before, undefined, blueprint.slug);
+      if (request !== aiRequest.current) return;
+      if (!data?.imageUrl) throw new Error('AI nije vratio sliku.');
+      setAi({ status: 'done', url: data.imageUrl, mock: !!data.isMock }); setView('ai'); setSplit(50);
+    } catch (error) {
+      if (request !== aiRequest.current) return;
+      const body = error.response?.data?.error;
+      const status = error.response?.status;
+      setAi({ status: 'error', error: status === 429 ? (typeof body === 'string' ? body : 'Previše zahtjeva. Pokušaj ponovo za 15 minuta.')
+        : status === 503 ? 'AI prikaz trenutno nije dostupan na ovom serveru.'
+        : 'AI prikaz nije uspio. Pokušaj ponovo.' });
+    }
+  };
+  const after = view === 'ai' && ai.status === 'done' ? ai.url : blueprint?.after;
   const download = () => {
     const link = document.createElement('a');
-    link.href = blueprint.after; link.download = `beardstyle-${blueprint.slug}.jpg`; link.click();
+    link.href = after; link.download = `beardstyle-${blueprint.slug}.jpg`; link.click();
   };
   const share = async () => {
     try {
-      const blob = await (await fetch(blueprint.after)).blob();
+      const blob = await (await fetch(after)).blob();
       const file = new File([blob], `beardstyle-${blueprint.slug}.jpg`, { type: 'image/jpeg' });
       if (navigator.canShare?.({ files: [file] }) && navigator.share) {
         await navigator.share({ title: `BeardStyle — ${blueprint.name}`, files: [file] });
@@ -98,16 +123,29 @@ export default function ARTryOnPage() {
         <h2 className="text-lg font-semibold">{blueprint.name} — prije i poslije</h2>
         <div className="relative aspect-video bg-black rounded-2xl overflow-hidden">
           <img src={blueprint.before} alt="Prije — originalni snimak" className="absolute inset-0 w-full h-full object-contain" />
-          <img src={blueprint.after} alt="Poslije — snimak s AR bradom" className="absolute inset-0 w-full h-full object-contain" style={{ clipPath: `inset(0 0 0 ${split}%)` }} />
+          <img src={after} alt={view === 'ai' ? 'Poslije — realistični AI prikaz' : 'Poslije — snimak s AR bradom'} className="absolute inset-0 w-full h-full object-contain" style={{ clipPath: `inset(0 0 0 ${split}%)` }} />
           <div className="absolute inset-y-0 border-l-2 border-amber-400" style={{ left: `${split}%` }} />
         </div>
         <label className="block">Prije / poslije
           <input aria-label="Prije / poslije" className="block w-full accent-amber-400" type="range" min="0" max="100" value={split} onChange={e => setSplit(Number(e.target.value))} />
         </label>
+        <section className="rounded-xl border border-amber-400/40 bg-gray-900 p-4 space-y-3" aria-label="Realistični AI prikaz">
+          {ai.status === 'done' ? <div className="flex flex-wrap gap-2" role="group" aria-label="Vrsta prikaza">
+            <button className={`btn ${view === 'ar' ? 'btn-primary' : 'btn-secondary'}`} aria-pressed={view === 'ar'} onClick={() => setView('ar')}>AR prikaz</button>
+            <button className={`btn ${view === 'ai' ? 'btn-primary' : 'btn-secondary'}`} aria-pressed={view === 'ai'} onClick={() => setView('ai')}>AI prikaz{ai.mock ? ' (demo)' : ''}</button>
+          </div> : <>
+            <p className="text-sm text-gray-300">AR je brza orijentacija. Za realističnu fotografiju AI uređuje tvoju bradu u stil <strong>{blueprint.name}</strong>, uključujući zamjenu postojeće brade.</p>
+            <p className="text-xs text-gray-500">Snimak se šalje našem serveru i AI servisu samo za ovu obradu. Traje obično 5–15 sekundi.</p>
+            <button className="btn btn-primary disabled:opacity-40" disabled={ai.status === 'loading'} onClick={generateAi}>
+              {ai.status === 'loading' ? 'AI generiše realističnu bradu…' : ai.status === 'error' ? 'Pokušaj ponovo' : '✨ Realistični prikaz (AI)'}
+            </button>
+            {ai.status === 'error' && <p role="alert" className="text-amber-400 text-sm">{ai.error}</p>}
+          </>}
+        </section>
         <div className="flex flex-wrap gap-3">
           <button className="btn btn-primary" onClick={download}>Preuzmi sliku</button>
           <button className="btn btn-secondary" onClick={share}>Podijeli</button>
-          <button className="btn btn-secondary" onClick={() => setBlueprint(null)}>Ponovi snimak</button>
+          <button className="btn btn-secondary" onClick={() => { resetAi(); setBlueprint(null); }}>Ponovi snimak</button>
         </div>
       </> : <>
         <div className="relative aspect-video bg-black rounded-2xl overflow-hidden">

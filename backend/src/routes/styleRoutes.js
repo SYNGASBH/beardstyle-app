@@ -7,6 +7,17 @@ const DalleService = require('../services/dalleService');
 const ReplicateService = require('../services/replicateService');
 const { optionalAuth, authenticateToken, authenticateUser } = require('../middleware/auth');
 const { stylesCache, popularCache } = require('../utils/cache');
+const rateLimit = require('express-rate-limit');
+
+// Each realistic generation is a paid AI call — keep a tighter per-IP budget
+// than the general /api limiter.
+const generationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Previše AI generisanja u kratkom roku. Pokušajte ponovo za 15 minuta.' },
+});
 
 // Get all beard styles with optional filters and pagination
 router.get('/', optionalAuth, async (req, res, next) => {
@@ -402,9 +413,10 @@ router.post('/visualize', async (req, res, next) => {
 
 // Generate realistic beard photo via Replicate inpainting
 // POST /api/styles/generate-realistic
-// Body: { imageBase64, maskBase64, styleSlug, quality?, strengthOverride? }
+// Body: { imageBase64, maskBase64?, styleSlug, quality?, strengthOverride? }
+// maskBase64 is required only for BEARD_ENGINE=inpaint; the default edit engine is mask-free.
 // Auth: optional — logged-in users get the result saved to their history
-router.post('/generate-realistic', optionalAuth, async (req, res, next) => {
+router.post('/generate-realistic', generationLimiter, optionalAuth, async (req, res, next) => {
   try {
     const { imageBase64, maskBase64, styleSlug, quality, strengthOverride } = req.body;
 
@@ -412,7 +424,8 @@ router.post('/generate-realistic', optionalAuth, async (req, res, next) => {
     if (!imageBase64) {
       return res.status(400).json({ error: 'imageBase64 is required' });
     }
-    if (!maskBase64) {
+    const needsMask = (process.env.BEARD_ENGINE || 'edit') === 'inpaint';
+    if (needsMask && !maskBase64) {
       return res.status(400).json({ error: 'maskBase64 is required — run generateBeardMask() on the frontend first' });
     }
     if (!styleSlug) {
