@@ -5,6 +5,12 @@ import useAuthStore from '../context/useAuthStore';
 import { detectFaceShape, loadFaceMesh } from '../utils/faceShape';
 import FaceGuideOverlay from '../components/FaceGuideOverlay';
 import FacePlacementGuide from '../components/FacePlacementGuide';
+import useAutoCapture from '../hooks/useAutoCapture';
+
+const AUTO_CAPTURE_KEY = 'beardstyle.autoCapture';
+const readAutoCapture = () => {
+  try { return localStorage.getItem(AUTO_CAPTURE_KEY) !== 'off'; } catch (_) { return true; }
+};
 
 const SHAPE_LABELS = {
   oval:        { label: 'Oval',         color: 'bg-green-100 text-green-800'  },
@@ -44,6 +50,8 @@ const UploadPage = () => {
   const [detectedFaceShape, setDetectedFaceShape] = useState(null);
   const [faceShapeDetecting, setFaceShapeDetecting] = useState(false);
   const [alignment, setAlignment]                 = useState(null);
+  const [autoCapture, setAutoCapture]             = useState(readAutoCapture);
+  const capturingRef = useRef(false);
   const streamRef = useRef(null);
   streamRef.current = stream;
 
@@ -140,6 +148,7 @@ const UploadPage = () => {
         audio: false,
       });
       setAlignment(null);
+      capturingRef.current = false;
       setStream(mediaStream);
       setUseCamera(true);
       setError(null);
@@ -169,16 +178,40 @@ const UploadPage = () => {
   const capturePhoto = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (video && canvas) {
+    if (video && canvas && !capturingRef.current) {
+      capturingRef.current = true;
+      try { navigator.vibrate?.(60); } catch (_) {}
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext('2d').drawImage(video, 0, 0);
       canvas.toBlob((blob) => {
+        if (!blob) { capturingRef.current = false; return; }
         const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
         handleFileSelect(file);
         stopCamera();
       }, 'image/jpeg');
     }
+  };
+
+  const autoState = useAutoCapture({
+    aligned: useCamera && !!alignment?.aligned,
+    enabled: autoCapture,
+    onCapture: capturePhoto,
+  });
+
+  const toggleAutoCapture = (enabled) => {
+    setAutoCapture(enabled);
+    try { localStorage.setItem(AUTO_CAPTURE_KEY, enabled ? 'on' : 'off'); } catch (_) {}
+  };
+
+  const cameraHint = () => {
+    if (autoState.phase === 'countdown') return `Ne pomjerajte se — slikam za ${autoState.count}…`;
+    if (autoState.phase === 'holding') return 'Odlično! Zadržite položaj…';
+    if (alignment?.message) return alignment.message;
+    if (alignment?.status === 'unavailable') {
+      return 'Automatska provjera nije dostupna — poravnajte lice s ovalom i uslikajte dugmetom.';
+    }
+    return 'Postavite lice u oval: oči na isprekidanoj liniji, brada na donjem rubu.';
   };
 
   // Upload to backend
@@ -318,6 +351,17 @@ const UploadPage = () => {
               <video ref={videoRef} className="w-full block" autoPlay playsInline muted aria-label="Kamera" />
               <FaceGuideOverlay videoRef={videoRef} onAlignmentChange={setAlignment} />
             </div>
+            {autoState.phase === 'countdown' && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+                <span
+                  key={autoState.count}
+                  data-testid="auto-capture-count"
+                  className="text-white text-8xl font-bold drop-shadow-lg animate-pulse"
+                >
+                  {autoState.count}
+                </span>
+              </div>
+            )}
           </div>
           <p
             role="status"
@@ -325,11 +369,16 @@ const UploadPage = () => {
               alignment?.aligned ? 'text-green-700' : 'text-amber-700'
             }`}
           >
-            {alignment?.message
-              || (alignment?.status === 'unavailable'
-                ? 'Automatska provjera nije dostupna — poravnajte lice s ovalom prema uputama ispod.'
-                : 'Postavite lice u oval: oči na isprekidanoj liniji, brada na donjem rubu.')}
+            {cameraHint()}
           </p>
+          <label className="flex items-center justify-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={autoCapture}
+              onChange={e => toggleAutoCapture(e.target.checked)}
+            />
+            Automatsko slikanje kad je lice poravnato
+          </label>
           <div className="flex gap-4 justify-center">
             <button
               onClick={capturePhoto}
