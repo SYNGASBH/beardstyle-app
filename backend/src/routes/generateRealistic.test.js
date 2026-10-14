@@ -39,3 +39,28 @@ test('image and style remain required', async () => {
   expect((await request(app).post('/api/styles/generate-realistic').send({ styleSlug: 'van-dyke' })).status).toBe(400);
   expect((await request(app).post('/api/styles/generate-realistic').send({ imageBase64: image })).status).toBe(400);
 });
+
+test('safety-filter rejection (E005) is a clear 422, not a 500', async () => {
+  ReplicateService.generateBeardVisualization.mockRejectedValueOnce(new Error(
+    'Replicate prediction failed: ModelError: The input or output was flagged as sensitive. Please try again with different inputs. (E005)'));
+  const res = await request(app).post('/api/styles/generate-realistic').send({ imageBase64: image, styleSlug: 'circle-beard' });
+  expect(res.status).toBe(422);
+  expect(res.body).toEqual(expect.objectContaining({ code: 'AI_INPUT_REJECTED', error: expect.stringMatching(/drugom/) }));
+});
+
+test('recommendations resolve catalog aliases returned by Claude', () => {
+  const { mergeRecommendations } = styleRoutes;
+  const db = [
+    { id: 1, slug: 'corporate-beard', name: 'Corporate Beard' },
+    { id: 2, slug: 'stubble-3day', name: '3-Day Stubble' },
+    { id: 3, slug: 'goatee', name: 'Goatee' },
+  ];
+  const merged = mergeRecommendations([
+    { slug: 'corporate', styleName: 'Korporativna Brada', matchScore: 90 },
+    { slug: 'stubble', styleName: 'Stubble (3-5 dana)', matchScore: 80 },
+    { styleName: 'Korporativna brada', matchScore: 70 },
+    { slug: 'not-a-style', styleName: 'Nepoznato' },
+  ], db);
+  expect(merged.map(s => s.id)).toEqual([1, 2, 1]);
+  expect(merged[0]).toEqual(expect.objectContaining({ aiRecommended: true, aiMatchScore: 90 }));
+});

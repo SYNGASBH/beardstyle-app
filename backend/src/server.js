@@ -27,6 +27,10 @@ const PORT = process.env.PORT || 5000;
 // MIDDLEWARE
 // ============================================
 
+// Behind one reverse proxy (nginx in Docker, CRA dev proxy locally): use the client IP
+// from X-Forwarded-For, otherwise every visitor shares the proxy's rate-limit bucket.
+app.set('trust proxy', 1);
+
 // CORS configuration (must be before helmet so preflight requests work)
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'

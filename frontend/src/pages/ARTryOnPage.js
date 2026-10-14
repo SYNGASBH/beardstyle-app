@@ -90,8 +90,10 @@ export default function ARTryOnPage() {
     } catch (error) {
       if (request !== aiRequest.current) return;
       const body = error.response?.data?.error;
+      const text = typeof body === 'string' ? body : body?.message;
       const status = error.response?.status;
-      setAi({ status: 'error', error: status === 429 ? (typeof body === 'string' ? body : 'Previše zahtjeva. Pokušaj ponovo za 15 minuta.')
+      setAi({ status: 'error', error: status === 429 ? (text || 'Previše zahtjeva. Pokušaj ponovo za 15 minuta.')
+        : status === 422 ? (text || 'AI servis je odbio ovu fotografiju. Pokušaj s drugim snimkom.')
         : status === 503 ? 'AI prikaz trenutno nije dostupan na ovom serveru.'
         : 'AI prikaz nije uspio. Pokušaj ponovo.' });
     }

@@ -7,6 +7,7 @@ const DalleService = require('../services/dalleService');
 const ReplicateService = require('../services/replicateService');
 const { optionalAuth, authenticateToken, authenticateUser } = require('../middleware/auth');
 const { stylesCache, popularCache } = require('../utils/cache');
+const { resolveStyle } = require('../utils/styleIdentity');
 const rateLimit = require('express-rate-limit');
 
 // Each realistic generation is a paid AI call — keep a tighter per-IP budget
@@ -216,10 +217,13 @@ function mergeRecommendations(aiRecommendations, dbStyles) {
   return aiRecommendations.map(aiStyle => {
     let matchedDbStyle = null;
 
-    // 1. Match po slug polju koje Claude vraća (najpouzdanije)
+    // 1. Match po slug polju koje Claude vraća (najpouzdanije).
+    //    Aliasi iz kataloga identiteta: "corporate" = "corporate-beard", "stubble" = "stubble-3day"…
     if (aiStyle.slug) {
+      const identity = resolveStyle(aiStyle.slug);
       matchedDbStyle = dbStyles.find(db =>
         db.slug === aiStyle.slug ||
+        (identity && resolveStyle(db.slug)?.id === identity.id) ||
         db.name.toLowerCase() === aiStyle.slug.replace(/-/g, ' ')
       );
     }
@@ -229,8 +233,10 @@ function mergeRecommendations(aiRecommendations, dbStyles) {
       const normalizedName = aiStyle.styleName.toLowerCase().trim();
       const mappedSlug = styleNameMapping[normalizedName];
       if (mappedSlug) {
+        const identity = resolveStyle(mappedSlug);
         matchedDbStyle = dbStyles.find(db =>
           db.slug === mappedSlug ||
+          (identity && resolveStyle(db.slug)?.id === identity.id) ||
           db.name.toLowerCase() === mappedSlug.replace(/-/g, ' ')
         );
       }
@@ -445,7 +451,7 @@ router.post('/generate-realistic', generationLimiter, optionalAuth, async (req, 
       });
     }
 
-    console.log(`🎨 [/generate-realistic] style=${styleSlug} quality=${quality || 'full'} strength=${strengthOverride || 'auto'} user=${req.user?.id || 'anonymous'}`);
+    console.log(`🎨 [/generate-realistic] style=${styleSlug} quality=${quality || 'full'} strength=${strengthOverride || 'auto'} user=${req.user?.userId || 'anonymous'}`);
 
     // ── Generate ─────────────────────────────────────────────────────────────
     const result = await ReplicateService.generateBeardVisualization(
@@ -462,8 +468,16 @@ router.post('/generate-realistic', generationLimiter, optionalAuth, async (req, 
 
   } catch (error) {
     console.error('[/generate-realistic] Error:', error.message);
+    // Replicate safety filter (E005): the photo, not the server, is the problem.
+    if (/\bE005\b|flagged as sensitive/i.test(error.message)) {
+      return res.status(422).json({
+        error: 'AI servis je odbio ovu fotografiju. Pokušajte s drugom: lice sprijeda, dobro osvjetljenje, bez drugih osoba.',
+        code: 'AI_INPUT_REJECTED',
+      });
+    }
     next(error);
   }
 });
 
 module.exports = router;
+module.exports.mergeRecommendations = mergeRecommendations;

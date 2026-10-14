@@ -83,3 +83,10 @@ test('AI rate limit is explained and retry stays available', async () => {
   expect(await screen.findByText('Previše AI generisanja u kratkom roku.')).toBeInTheDocument();
   expect(screen.getByText('Pokušaj ponovo')).not.toBeDisabled();
 });
+
+test('AI safety rejection explains that a different photo is needed', async () => {
+  stylesAPI.generateRealistic.mockRejectedValueOnce({ response: { status: 422, data: { error: 'AI servis je odbio ovu fotografiju.' } } });
+  await captureFrame();
+  fireEvent.click(screen.getByText('✨ Realistični prikaz (AI)'));
+  expect(await screen.findByText('AI servis je odbio ovu fotografiju.')).toBeInTheDocument();
+});
