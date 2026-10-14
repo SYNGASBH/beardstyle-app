@@ -93,3 +93,12 @@ test('renderer is a safe no-op without landmarks or a usable canvas', () => {
   expect(Object.keys(BEARD_COLORS)).toContain('grey');
   getContext.mockRestore();
 });
+
+test('auto colour tones are quantized and ordered dark < base < light', () => {
+  const { tonesFromRgb } = require('./arPreview');
+  const t = tonesFromRgb([101, 92, 85]);
+  const lum = h => parseInt(h.slice(1, 3), 16) + parseInt(h.slice(3, 5), 16) + parseInt(h.slice(5, 7), 16);
+  expect(lum(t.dark)).toBeLessThan(lum(t.base));
+  expect(lum(t.base)).toBeLessThan(lum(t.light));
+  expect(tonesFromRgb([100, 90, 84]).base).toBe(t.base); // near-identical samples reuse one texture
+});

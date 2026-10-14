@@ -90,3 +90,13 @@ test('AI safety rejection explains that a different photo is needed', async () =
   fireEvent.click(screen.getByText('✨ Realistični prikaz (AI)'));
   expect(await screen.findByText('AI servis je odbio ovu fotografiju.')).toBeInTheDocument();
 });
+
+test('one-tap realistic capture sends the frame to AI immediately', async () => {
+  stylesAPI.generateRealistic.mockResolvedValueOnce({ data: { imageUrl: '/uploads/generated/ai2.jpg' } });
+  showPage();
+  fireEvent.click(screen.getByText('Pokreni kameru'));
+  await waitFor(() => expect(screen.getByText('✨ Snimi realistično (AI)').disabled).toBe(false));
+  fireEvent.click(screen.getByText('✨ Snimi realistično (AI)'));
+  expect(stylesAPI.generateRealistic).toHaveBeenCalledWith('data:image/jpeg;base64,before', undefined, 'full-beard');
+  expect((await screen.findByAltText('Poslije — realistični AI prikaz')).getAttribute('src')).toBe('/uploads/generated/ai2.jpg');
+});

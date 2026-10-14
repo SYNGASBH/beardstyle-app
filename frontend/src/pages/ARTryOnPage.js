@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ARBeardOverlay from '../components/ARBeardOverlay';
 import { BEARD_STYLES } from '../data/beardStyles';
-import { AR_SHAPES, BEARD_COLORS, captureARFrame } from '../utils/arPreview';
+import { AR_SHAPES, AUTO_COLOR, BEARD_COLORS, captureARFrame } from '../utils/arPreview';
 import { stylesAPI } from '../services/api';
 
 const styles = BEARD_STYLES.filter(style => AR_SHAPES[style.slug]);
@@ -24,7 +24,7 @@ export default function ARTryOnPage() {
   const [visible, setVisible] = useState(true);
   const [techLines, setTechLines] = useState(false);
   const [opacity, setOpacity] = useState(0.85);
-  const [color, setColor] = useState('dark-brown');
+  const [color, setColor] = useState(AUTO_COLOR);
   const [blueprint, setBlueprint] = useState(null);
   const [split, setSplit] = useState(50);
   const [message, setMessage] = useState('');
@@ -71,19 +71,21 @@ export default function ARTryOnPage() {
 
   const onFace = useCallback(face => { faceRef.current = face; setTracking(true); }, []);
   const onLost = useCallback(() => { faceRef.current = null; setTracking(false); }, []);
-  const capture = () => {
+  const capture = ({ realistic = false } = {}) => {
     if (!ready || !faceRef.current) return;
     try {
       const frames = captureARFrame(videoRef.current, visible ? overlayRef.current?.getCanvas() : null);
-      setBlueprint({ ...frames, name: style.name, slug }); setMessage(''); setSplit(50); resetAi();
+      const shot = { ...frames, name: style.name, slug };
+      setBlueprint(shot); setMessage(''); setSplit(50); resetAi();
+      if (realistic) generateAi(shot);
     } catch (error) { setMessage(error.message); }
   };
   function resetAi() { aiRequest.current += 1; setAi({ status: 'idle' }); setView('ar'); }
-  const generateAi = async () => {
+  const generateAi = async (shot = blueprint) => {
     const request = ++aiRequest.current;
     setAi({ status: 'loading' }); setMessage('');
     try {
-      const { data } = await stylesAPI.generateRealistic(blueprint.before, undefined, blueprint.slug);
+      const { data } = await stylesAPI.generateRealistic(shot.before, undefined, shot.slug);
       if (request !== aiRequest.current) return;
       if (!data?.imageUrl) throw new Error('AI nije vratio sliku.');
       setAi({ status: 'done', url: data.imageUrl, mock: !!data.isMock }); setView('ai'); setSplit(50);
@@ -138,7 +140,7 @@ export default function ARTryOnPage() {
           </div> : <>
             <p className="text-sm text-gray-300">AR je brza orijentacija. Za realističnu fotografiju AI uređuje tvoju bradu u stil <strong>{blueprint.name}</strong>, uključujući zamjenu postojeće brade.</p>
             <p className="text-xs text-gray-500">Snimak se šalje našem serveru i AI servisu samo za ovu obradu. Traje obično 5–15 sekundi.</p>
-            <button className="btn btn-primary disabled:opacity-40" disabled={ai.status === 'loading'} onClick={generateAi}>
+            <button className="btn btn-primary disabled:opacity-40" disabled={ai.status === 'loading'} onClick={() => generateAi()}>
               {ai.status === 'loading' ? 'AI generiše realističnu bradu…' : ai.status === 'error' ? 'Pokušaj ponovo' : '✨ Realistični prikaz (AI)'}
             </button>
             {ai.status === 'error' && <p role="alert" className="text-amber-400 text-sm">{ai.error}</p>}
@@ -173,6 +175,7 @@ export default function ARTryOnPage() {
         </label>
         <label className="block">Boja brade
           <select value={color} onChange={e => setColor(e.target.value)} className="block w-full bg-gray-800 rounded-lg p-3 mt-2">
+            <option value={AUTO_COLOR}>Automatski (prema obrvama)</option>
             {Object.entries(BEARD_COLORS).map(([key, c]) => <option key={key} value={key}>{c.label}</option>)}
           </select>
         </label>
@@ -181,7 +184,11 @@ export default function ARTryOnPage() {
           <label><input type="checkbox" checked={visible} onChange={e => setVisible(e.target.checked)} /> Prikaži bradu</label>
           <label><input type="checkbox" checked={techLines} onChange={e => setTechLines(e.target.checked)} /> Linija vilice</label>
         </div>
-        <button className="btn btn-primary disabled:opacity-40" disabled={!ready || !tracking || !!trackingError} onClick={capture}>Snimi prikaz</button>
+        <div className="flex flex-wrap gap-3">
+          <button className="btn btn-secondary disabled:opacity-40" disabled={!ready || !tracking || !!trackingError} onClick={() => capture()}>Snimi prikaz</button>
+          <button className="btn btn-primary disabled:opacity-40" disabled={!ready || !tracking || !!trackingError} onClick={() => capture({ realistic: true })}>✨ Snimi realistično (AI)</button>
+        </div>
+        <p className="text-xs text-gray-500">AR je brz pregled oblika. „Snimi realistično“ šalje snimak AI servisu i za 5–15 s daje fotorealističnu bradu, uključujući zamjenu postojeće.</p>
       </>}
       {message && <p role="status">{message}</p>}
     </div>

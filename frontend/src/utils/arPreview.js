@@ -33,6 +33,8 @@ const CHIN_BAND = {
   'anchor-beard': 1.65, 'circle-beard': 1.3,
 };
 
+// 'auto' samples the user's eyebrows from the live frame (see sampleHairColor).
+export const AUTO_COLOR = 'auto';
 export const BEARD_COLORS = {
   'black': { label: 'Crna', base: '#17120f', light: '#3a302a', dark: '#050403' },
   'dark-brown': { label: 'Tamnosmeđa', base: '#33251c', light: '#5b4331', dark: '#140d09' },
@@ -223,17 +225,17 @@ const TEXTURE_SPEC = {
 };
 const textureCache = new Map();
 
-function hairTexture(kind, colorKey) {
-  const key = `${kind}:${colorKey}`;
+function hairTexture(kind, color) {
+  const key = `${kind}:${color.base}`;
   if (textureCache.has(key)) return textureCache.get(key);
+  if (textureCache.size > 24) textureCache.delete(textureCache.keys().next().value);
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = TEXTURE_SIZE;
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
   const spec = TEXTURE_SPEC[kind];
-  const color = BEARD_COLORS[colorKey] || BEARD_COLORS['dark-brown'];
   const tones = [color.dark, color.base, color.base, color.light];
-  const rand = rng(kind.length * 7919 + colorKey.length * 104729);
+  const rand = rng(kind.length * 7919 + 104729);
   ctx.lineCap = 'round';
   for (let i = 0; i < spec.count; i++) {
     const x = rand() * TEXTURE_SIZE, y = rand() * TEXTURE_SIZE;
@@ -260,6 +262,43 @@ function hairTexture(kind, colorKey) {
   return canvas;
 }
 
+const BROWS = [70, 63, 105, 66, 107, 336, 296, 334, 293, 300];
+const hex = v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0');
+const toHex = ([r, g, b]) => `#${hex(r)}${hex(g)}${hex(b)}`;
+
+/** Tones derived from one RGB colour, quantized so the texture cache stays small. */
+export function tonesFromRgb(rgb) {
+  const q = rgb.map(v => Math.round(v / 12) * 12);
+  return {
+    base: toHex(q),
+    light: toHex(q.map(v => v + (255 - v) * 0.35)),
+    dark: toHex(q.map(v => v * 0.45)),
+  };
+}
+
+/**
+ * Hair colour from the eyebrows: the darkest third of the brow pixels
+ * (skin between hairs is lighter). Returns null when the frame cannot be read.
+ */
+export function sampleHairColor(source, points, sampler) {
+  try {
+    const xs = BROWS.map(i => points[i].x), ys = BROWS.map(i => points[i].y);
+    const x0 = Math.min(...xs), y0 = Math.min(...ys);
+    const w = Math.max(...xs) - x0, h = Math.max(4, Math.max(...ys) - y0);
+    sampler.width = 48; sampler.height = 12;
+    const c = sampler.getContext('2d', { willReadFrequently: true });
+    c.drawImage(source, x0, y0, w, h, 0, 0, 48, 12);
+    const d = c.getImageData(0, 0, 48, 12).data;
+    const px = [];
+    for (let i = 0; i < d.length; i += 4) px.push([d[i], d[i + 1], d[i + 2], 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]]);
+    px.sort((a, b) => a[3] - b[3]);
+    const dark = px.slice(0, Math.max(1, Math.floor(px.length / 3)));
+    return [0, 1, 2].map(k => dark.reduce((sum, p) => sum + p[k], 0) / dark.length);
+  } catch (_) {
+    return null;
+  }
+}
+
 const WORK_MAX = 800; // long side of the working canvases; keeps live preview fast
 const workCache = new WeakMap();
 
@@ -267,13 +306,13 @@ function workCanvases(target) {
   let work = workCache.get(target);
   if (!work) {
     const make = () => document.createElement('canvas');
-    work = { mask: make(), soft: make() };
+    work = { mask: make(), soft: make(), shade: make(), sampler: make(), hair: null, frame: 0 };
     workCache.set(target, work);
   }
   const scale = Math.min(1, WORK_MAX / Math.max(target.width, target.height));
   const w = Math.max(1, Math.round(target.width * scale));
   const h = Math.max(1, Math.round(target.height * scale));
-  for (const c of [work.mask, work.soft]) {
+  for (const c of [work.mask, work.soft, work.shade]) {
     if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
   }
   return { ...work, scale };
@@ -285,18 +324,29 @@ function workCanvases(target) {
  * @param {import('./faceTracker').FaceTransform} face
  * @param {string} slug
  * @param {number} [opacity=0.8]
- * @param {{ color?: keyof BEARD_COLORS }} [options]
+ * @param {{ color?: keyof BEARD_COLORS | 'auto', source?: CanvasImageSource }} [options]
+ *   `source` is the video frame: enables 'auto' colour and lighting from the face.
  */
 export function drawARBeard(ctx, face, slug, opacity = 0.8, options = {}) {
   if (!ctx?.canvas || !face?.points) return;
   const layers = beardLayers(slug, face.points);
   if (!layers.length) return;
-  const { mask, soft, scale } = workCanvases(ctx.canvas);
+  const work = workCanvases(ctx.canvas);
+  const { mask, soft, shade, scale } = work;
   const m = mask.getContext('2d');
   const s = soft.getContext('2d');
   if (!m || !s) return;
-  const colorKey = BEARD_COLORS[options.color] ? options.color : 'dark-brown';
-  const color = BEARD_COLORS[colorKey];
+  const source = options.source;
+  let color = BEARD_COLORS[options.color] || BEARD_COLORS['dark-brown'];
+  if (options.color === AUTO_COLOR && source) {
+    // Re-sample every ~10 frames and smooth, so the colour does not flicker.
+    if (!work.hair || work.frame % 10 === 0) {
+      const rgb = sampleHairColor(source, face.points, work.sampler);
+      if (rgb) work.hair = work.hair ? work.hair.map((v, i) => v * 0.7 + rgb[i] * 0.3) : rgb;
+    }
+    work.frame += 1;
+    if (work.hair) color = tonesFromRgb(work.hair);
+  }
   const H = Math.hypot(face.chinTip.x - face.noseTip.x, face.chinTip.y - face.noseTip.y) * scale;
   const blur = Math.max(1.5, H * 0.035);
 
@@ -346,7 +396,7 @@ export function drawARBeard(ctx, face, slug, opacity = 0.8, options = {}) {
     s.globalAlpha = layer.density;
     s.fillStyle = color.base;
     s.fillRect(0, 0, soft.width, soft.height);
-    const tex = hairTexture(layer.texture, colorKey);
+    const tex = hairTexture(layer.texture, color);
     if (tex) {
       s.globalCompositeOperation = 'source-atop';
       s.globalAlpha = 1;
@@ -361,7 +411,28 @@ export function drawARBeard(ctx, face, slug, opacity = 0.8, options = {}) {
       s.restore();
     }
 
-    // 4. Composite onto the overlay in video pixel space.
+    // 4. Lighting: the face's own light and shadow (luminance only) modulate the beard.
+    const sh = source && shade.getContext('2d');
+    if (sh) {
+      try {
+        sh.setTransform(1, 0, 0, 1, 0, 0);
+        sh.globalAlpha = 1;
+        sh.globalCompositeOperation = 'source-over';
+        sh.fillStyle = '#808080';
+        sh.fillRect(0, 0, shade.width, shade.height);
+        sh.globalCompositeOperation = 'luminosity';
+        sh.drawImage(source, 0, 0, shade.width, shade.height);
+        sh.globalCompositeOperation = 'destination-in';
+        sh.drawImage(soft, 0, 0);
+        s.globalCompositeOperation = 'soft-light';
+        s.globalAlpha = 0.7;
+        s.drawImage(shade, 0, 0);
+      } catch (_) {
+        // Tainted or unsupported frame: keep the flat-lit beard.
+      }
+    }
+
+    // 5. Composite onto the overlay in video pixel space.
     ctx.save();
     ctx.globalAlpha = opacity;
     ctx.drawImage(soft, 0, 0, ctx.canvas.width, ctx.canvas.height);
