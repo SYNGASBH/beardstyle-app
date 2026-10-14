@@ -7,6 +7,18 @@ const DalleService = require('../services/dalleService');
 const ReplicateService = require('../services/replicateService');
 const { optionalAuth, authenticateToken, authenticateUser } = require('../middleware/auth');
 const { stylesCache, popularCache } = require('../utils/cache');
+const { resolveStyle } = require('../utils/styleIdentity');
+const rateLimit = require('express-rate-limit');
+
+// Each realistic generation is a paid AI call — keep a tighter per-IP budget
+// than the general /api limiter.
+const generationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Previše AI generisanja u kratkom roku. Pokušajte ponovo za 15 minuta.' },
+});
 
 // Get all beard styles with optional filters and pagination
 router.get('/', optionalAuth, async (req, res, next) => {
@@ -205,10 +217,13 @@ function mergeRecommendations(aiRecommendations, dbStyles) {
   return aiRecommendations.map(aiStyle => {
     let matchedDbStyle = null;
 
-    // 1. Match po slug polju koje Claude vraća (najpouzdanije)
+    // 1. Match po slug polju koje Claude vraća (najpouzdanije).
+    //    Aliasi iz kataloga identiteta: "corporate" = "corporate-beard", "stubble" = "stubble-3day"…
     if (aiStyle.slug) {
+      const identity = resolveStyle(aiStyle.slug);
       matchedDbStyle = dbStyles.find(db =>
         db.slug === aiStyle.slug ||
+        (identity && resolveStyle(db.slug)?.id === identity.id) ||
         db.name.toLowerCase() === aiStyle.slug.replace(/-/g, ' ')
       );
     }
@@ -218,8 +233,10 @@ function mergeRecommendations(aiRecommendations, dbStyles) {
       const normalizedName = aiStyle.styleName.toLowerCase().trim();
       const mappedSlug = styleNameMapping[normalizedName];
       if (mappedSlug) {
+        const identity = resolveStyle(mappedSlug);
         matchedDbStyle = dbStyles.find(db =>
           db.slug === mappedSlug ||
+          (identity && resolveStyle(db.slug)?.id === identity.id) ||
           db.name.toLowerCase() === mappedSlug.replace(/-/g, ' ')
         );
       }
@@ -402,9 +419,10 @@ router.post('/visualize', async (req, res, next) => {
 
 // Generate realistic beard photo via Replicate inpainting
 // POST /api/styles/generate-realistic
-// Body: { imageBase64, maskBase64, styleSlug, quality?, strengthOverride? }
+// Body: { imageBase64, maskBase64?, styleSlug, quality?, strengthOverride? }
+// maskBase64 is required only for BEARD_ENGINE=inpaint; the default edit engine is mask-free.
 // Auth: optional — logged-in users get the result saved to their history
-router.post('/generate-realistic', optionalAuth, async (req, res, next) => {
+router.post('/generate-realistic', generationLimiter, optionalAuth, async (req, res, next) => {
   try {
     const { imageBase64, maskBase64, styleSlug, quality, strengthOverride } = req.body;
 
@@ -412,7 +430,8 @@ router.post('/generate-realistic', optionalAuth, async (req, res, next) => {
     if (!imageBase64) {
       return res.status(400).json({ error: 'imageBase64 is required' });
     }
-    if (!maskBase64) {
+    const needsMask = (process.env.BEARD_ENGINE || 'edit') === 'inpaint';
+    if (needsMask && !maskBase64) {
       return res.status(400).json({ error: 'maskBase64 is required — run generateBeardMask() on the frontend first' });
     }
     if (!styleSlug) {
@@ -432,7 +451,7 @@ router.post('/generate-realistic', optionalAuth, async (req, res, next) => {
       });
     }
 
-    console.log(`🎨 [/generate-realistic] style=${styleSlug} quality=${quality || 'full'} strength=${strengthOverride || 'auto'} user=${req.user?.id || 'anonymous'}`);
+    console.log(`🎨 [/generate-realistic] style=${styleSlug} quality=${quality || 'full'} strength=${strengthOverride || 'auto'} user=${req.user?.userId || 'anonymous'}`);
 
     // ── Generate ─────────────────────────────────────────────────────────────
     const result = await ReplicateService.generateBeardVisualization(
@@ -449,8 +468,16 @@ router.post('/generate-realistic', optionalAuth, async (req, res, next) => {
 
   } catch (error) {
     console.error('[/generate-realistic] Error:', error.message);
+    // Replicate safety filter (E005): the photo, not the server, is the problem.
+    if (/\bE005\b|flagged as sensitive/i.test(error.message)) {
+      return res.status(422).json({
+        error: 'AI servis je odbio ovu fotografiju. Pokušajte s drugom: lice sprijeda, dobro osvjetljenje, bez drugih osoba.',
+        code: 'AI_INPUT_REJECTED',
+      });
+    }
     next(error);
   }
 });
 
 module.exports = router;
+module.exports.mergeRecommendations = mergeRecommendations;

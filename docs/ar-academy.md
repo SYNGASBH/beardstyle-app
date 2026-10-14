@@ -6,7 +6,9 @@ Kamera se pokreće na dugme, bez automatskog zahtjeva za pristup pri otvaranju s
 
 Snimanje i odlazak sa stranice zaustavljaju kameru. „Ponovi snimak“ otvara novi stream. Neuspjela dozvola i učitavanje trackera imaju jasne poruke i ponovno pokretanje. Nema nasumičnih „AI match“ rezultata.
 
-Prikaz koristi transparentne proceduralne oblike na Canvas 2D i postojeći MediaPipe tracker. Galerijski crteži s bijelom pozadinom više se ne lijepe na lice. Ovo je ilustrativni prikaz, ne fotorealistično generisanje; ne uklanja postojeću bradu. Za kameru je potreban HTTPS ili localhost, dozvola kamere i WebGL za MediaPipe. Tracker učitava biblioteku/model s jsDelivr CDN-a; fotografije i snimci ne šalju se serveru.
+Prikaz koristi transparentne proceduralne oblike na Canvas 2D i postojeći MediaPipe tracker. Oblici prate stvarne tačke lica (linija obraza, vilica, usne), ivice su omekšane, a ispuna ima teksturu dlaka; korisnik bira boju brade. Galerijski crteži s bijelom pozadinom više se ne lijepe na lice. Ovo je ilustrativni prikaz koji dodaje bradu; ne uklanja postojeću bradu. Za kameru je potreban HTTPS ili localhost, dozvola kamere i WebGL za MediaPipe. Tracker učitava biblioteku/model s jsDelivr CDN-a; prikaz uživo ostaje na uređaju.
+
+Nakon snimka korisnik može zatražiti **realistični AI prikaz**. Tek tada se snimak šalje na `POST /api/styles/generate-realistic` (podrazumijevani engine `BEARD_ENGINE=edit`, Nano Banana preko Replicate; maska nije potrebna). AI mijenja i postojeću bradu. Ruta ima zasebno ograničenje od 20 zahtjeva na 15 minuta po IP adresi jer je svaki poziv plaćen. Bez `REPLICATE_API_TOKEN` ruta vraća 503, a s `USE_MOCK_AI=true` vraća demo sliku stila.
 
 ## Akademija — `/akademija`
 

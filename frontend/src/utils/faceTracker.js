@@ -175,6 +175,7 @@ export function destroyTracker() {
  * @property {{x:number,y:number}} mouthLeft - Left mouth corner (px)
  * @property {{x:number,y:number}} mouthRight - Right mouth corner (px)
  * @property {number} confidence    - Detection quality (0–1)
+ * @property {{x:number,y:number}[]} points - All landmarks (px)
  */
 
 // Jawline landmark indices (ear-to-ear along the jaw)
@@ -282,6 +283,8 @@ function calculateBeardTransform(landmarks, w, h) {
     mouthLeft,
     mouthRight,
     confidence,
+    // All 468 landmarks in pixels, for renderers that follow real face contours
+    points: landmarks.map(lm => ({ x: lm.x * w, y: lm.y * h })),
   };
 }
 

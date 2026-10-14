@@ -3,13 +3,13 @@ import { initTracker, processFrame, destroyTracker } from '../utils/faceTracker'
 import { drawARBeard } from '../utils/arPreview';
 
 const ARBeardOverlay = forwardRef(function ARBeardOverlay({
-  videoRef, beardStyle = 'full-beard', opacity = 0.8, showTechLines = true,
+  videoRef, beardStyle = 'full-beard', opacity = 0.8, beardColor = 'auto', showTechLines = true,
   visible = true, onFaceDetected, onTrackingLost, onError,
 }, ref) {
   const canvasRef = useRef(null);
   const linesRef = useRef(null);
   const latest = useRef({});
-  latest.current = { beardStyle, opacity, showTechLines, visible, onFaceDetected, onTrackingLost, onError };
+  latest.current = { beardStyle, beardColor, opacity, showTechLines, visible, onFaceDetected, onTrackingLost, onError };
   useImperativeHandle(ref, () => ({ getCanvas: () => canvasRef.current }), []);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ const ARBeardOverlay = forwardRef(function ARBeardOverlay({
         }
         const settings = latest.current;
         if (face && face.confidence > 0.3) {
-          if (settings.visible) drawARBeard(canvas.getContext('2d'), face, settings.beardStyle, settings.opacity);
+          if (settings.visible) drawARBeard(canvas.getContext('2d'), face, settings.beardStyle, settings.opacity, { color: settings.beardColor, source: video });
           if (settings.showTechLines) {
             const ctx = lines.getContext('2d');
             ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;

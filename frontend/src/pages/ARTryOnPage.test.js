@@ -3,6 +3,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import ARTryOnPage from './ARTryOnPage';
 import { captureARFrame } from '../utils/arPreview';
+import { stylesAPI } from '../services/api';
+
+jest.mock('../services/api', () => ({ stylesAPI: { generateRealistic: jest.fn() } }));
 
 jest.mock('../utils/arPreview', () => ({
   ...jest.requireActual('../utils/arPreview'),
@@ -30,7 +33,7 @@ const showPage = () => render(<MemoryRouter future={{ v7_startTransition: true, 
 test('camera starts on request, captures overlay, stops and restarts for retake', async () => {
   const { unmount } = showPage();
   expect(getUserMedia).not.toHaveBeenCalled();
-  expect(screen.getByRole('combobox').value).toBe('full-beard');
+  expect(screen.getByLabelText('Stil brade').value).toBe('full-beard');
   fireEvent.click(screen.getByText('Pokreni kameru'));
   await waitFor(() => expect(screen.getByText('Snimi prikaz').disabled).toBe(false));
   fireEvent.click(screen.getByText('Snimi prikaz'));
@@ -50,4 +53,50 @@ test('permission denial offers retry and does not permit capture', async () => {
   expect(screen.getByText('Snimi prikaz').disabled).toBe(true);
   fireEvent.click(screen.getByText('Pokušaj ponovo'));
   await waitFor(() => expect(screen.getByText('Snimi prikaz').disabled).toBe(false));
+});
+
+const captureFrame = async () => {
+  showPage();
+  fireEvent.click(screen.getByText('Pokreni kameru'));
+  await waitFor(() => expect(screen.getByText('Snimi prikaz').disabled).toBe(false));
+  fireEvent.click(screen.getByText('Snimi prikaz'));
+};
+
+test('realistic AI render is requested only on demand and can be compared with AR', async () => {
+  stylesAPI.generateRealistic.mockResolvedValueOnce({ data: { imageUrl: '/uploads/generated/ai.jpg' } });
+  await captureFrame();
+  expect(stylesAPI.generateRealistic).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByText('✨ Realistični prikaz (AI)'));
+  expect(stylesAPI.generateRealistic).toHaveBeenCalledWith('data:image/jpeg;base64,before', undefined, 'full-beard');
+  const aiImage = await screen.findByAltText('Poslije — realistični AI prikaz');
+  expect(aiImage.getAttribute('src')).toBe('/uploads/generated/ai.jpg');
+  fireEvent.click(screen.getByText('AR prikaz'));
+  expect(screen.getByAltText('Poslije — snimak s AR bradom').getAttribute('src')).toBe('data:image/jpeg;base64,after');
+  fireEvent.click(screen.getByText('Ponovi snimak'));
+  await waitFor(() => expect(screen.getByText('Snimi prikaz')).toBeInTheDocument());
+});
+
+test('AI rate limit is explained and retry stays available', async () => {
+  stylesAPI.generateRealistic.mockRejectedValueOnce({ response: { status: 429, data: { error: 'Previše AI generisanja u kratkom roku.' } } });
+  await captureFrame();
+  fireEvent.click(screen.getByText('✨ Realistični prikaz (AI)'));
+  expect(await screen.findByText('Previše AI generisanja u kratkom roku.')).toBeInTheDocument();
+  expect(screen.getByText('Pokušaj ponovo')).not.toBeDisabled();
+});
+
+test('AI safety rejection explains that a different photo is needed', async () => {
+  stylesAPI.generateRealistic.mockRejectedValueOnce({ response: { status: 422, data: { error: 'AI servis je odbio ovu fotografiju.' } } });
+  await captureFrame();
+  fireEvent.click(screen.getByText('✨ Realistični prikaz (AI)'));
+  expect(await screen.findByText('AI servis je odbio ovu fotografiju.')).toBeInTheDocument();
+});
+
+test('one-tap realistic capture sends the frame to AI immediately', async () => {
+  stylesAPI.generateRealistic.mockResolvedValueOnce({ data: { imageUrl: '/uploads/generated/ai2.jpg' } });
+  showPage();
+  fireEvent.click(screen.getByText('Pokreni kameru'));
+  await waitFor(() => expect(screen.getByText('✨ Snimi realistično (AI)').disabled).toBe(false));
+  fireEvent.click(screen.getByText('✨ Snimi realistično (AI)'));
+  expect(stylesAPI.generateRealistic).toHaveBeenCalledWith('data:image/jpeg;base64,before', undefined, 'full-beard');
+  expect((await screen.findByAltText('Poslije — realistični AI prikaz')).getAttribute('src')).toBe('/uploads/generated/ai2.jpg');
 });

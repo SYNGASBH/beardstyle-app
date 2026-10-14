@@ -3,6 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../services/api';
 import useAuthStore from '../context/useAuthStore';
 import { detectFaceShape, loadFaceMesh } from '../utils/faceShape';
+import FaceGuideOverlay from '../components/FaceGuideOverlay';
+import FacePlacementGuide from '../components/FacePlacementGuide';
+import useAutoCapture from '../hooks/useAutoCapture';
+
+const AUTO_CAPTURE_KEY = 'beardstyle.autoCapture';
+const readAutoCapture = () => {
+  try { return localStorage.getItem(AUTO_CAPTURE_KEY) !== 'off'; } catch (_) { return true; }
+};
 
 const SHAPE_LABELS = {
   oval:        { label: 'Oval',         color: 'bg-green-100 text-green-800'  },
@@ -41,6 +49,14 @@ const UploadPage = () => {
   const [stream, setStream]                       = useState(null);
   const [detectedFaceShape, setDetectedFaceShape] = useState(null);
   const [faceShapeDetecting, setFaceShapeDetecting] = useState(false);
+  const [alignment, setAlignment]                 = useState(null);
+  const [autoCapture, setAutoCapture]             = useState(readAutoCapture);
+  const capturingRef = useRef(false);
+  const streamRef = useRef(null);
+  streamRef.current = stream;
+
+  // Camera must never outlive the page
+  useEffect(() => () => streamRef.current?.getTracks().forEach(track => track.stop()), []);
 
   // Run local FaceMesh detection on a data-URL image
   const runFaceDetection = (dataUrl) => {
@@ -124,14 +140,23 @@ const UploadPage = () => {
   // Camera functions
   const startCamera = async () => {
     try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error('Kamera zahtijeva HTTPS ili localhost i podržan preglednik.');
+      }
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user' },
+        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
+        audio: false,
       });
+      setAlignment(null);
+      capturingRef.current = false;
       setStream(mediaStream);
       setUseCamera(true);
       setError(null);
     } catch (err) {
-      setError('Ne mogu pristupiti kameri. Provjerite dozvole.');
+      setError(err.name === 'NotAllowedError'
+        ? 'Pristup kameri je odbijen. Dozvolite kameru u postavkama preglednika.'
+        : err.name === 'NotFoundError' ? 'Kamera nije pronađena. Učitajte fotografiju umjesto toga.'
+        : 'Ne mogu pristupiti kameri. Provjerite dozvole.');
       console.error('Camera error:', err);
     }
   };
@@ -153,16 +178,40 @@ const UploadPage = () => {
   const capturePhoto = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (video && canvas) {
+    if (video && canvas && !capturingRef.current) {
+      capturingRef.current = true;
+      try { navigator.vibrate?.(60); } catch (_) {}
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext('2d').drawImage(video, 0, 0);
       canvas.toBlob((blob) => {
+        if (!blob) { capturingRef.current = false; return; }
         const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
         handleFileSelect(file);
         stopCamera();
       }, 'image/jpeg');
     }
+  };
+
+  const autoState = useAutoCapture({
+    aligned: useCamera && !!alignment?.aligned,
+    enabled: autoCapture,
+    onCapture: capturePhoto,
+  });
+
+  const toggleAutoCapture = (enabled) => {
+    setAutoCapture(enabled);
+    try { localStorage.setItem(AUTO_CAPTURE_KEY, enabled ? 'on' : 'off'); } catch (_) {}
+  };
+
+  const cameraHint = () => {
+    if (autoState.phase === 'countdown') return `Ne pomjerajte se — slikam za ${autoState.count}…`;
+    if (autoState.phase === 'holding') return 'Odlično! Zadržite položaj…';
+    if (alignment?.message) return alignment.message;
+    if (alignment?.status === 'unavailable') {
+      return 'Automatska provjera nije dostupna — poravnajte lice s ovalom i uslikajte dugmetom.';
+    }
+    return 'Postavite lice u oval: oči na isprekidanoj liniji, brada na donjem rubu.';
   };
 
   // Upload to backend
@@ -296,13 +345,46 @@ const UploadPage = () => {
       {/* Camera View */}
       {useCamera && (
         <div className="space-y-4">
+          {/* Mirrored like a selfie mirror; the captured photo stays unmirrored */}
           <div className="relative bg-black rounded-lg overflow-hidden">
-            <video ref={videoRef} className="w-full" autoPlay playsInline muted />
+            <div className="relative" style={{ transform: 'scaleX(-1)' }}>
+              <video ref={videoRef} className="w-full block" autoPlay playsInline muted aria-label="Kamera" />
+              <FaceGuideOverlay videoRef={videoRef} onAlignmentChange={setAlignment} />
+            </div>
+            {autoState.phase === 'countdown' && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+                <span
+                  key={autoState.count}
+                  data-testid="auto-capture-count"
+                  className="text-white text-8xl font-bold drop-shadow-lg animate-pulse"
+                >
+                  {autoState.count}
+                </span>
+              </div>
+            )}
           </div>
+          <p
+            role="status"
+            className={`text-center font-medium min-h-[1.5rem] ${
+              alignment?.aligned ? 'text-green-700' : 'text-amber-700'
+            }`}
+          >
+            {cameraHint()}
+          </p>
+          <label className="flex items-center justify-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={autoCapture}
+              onChange={e => toggleAutoCapture(e.target.checked)}
+            />
+            Automatsko slikanje kad je lice poravnato
+          </label>
           <div className="flex gap-4 justify-center">
             <button
               onClick={capturePhoto}
-              className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors"
+              className={`text-white px-6 py-3 rounded-lg transition-colors ${
+                alignment?.aligned ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
+              }`}
             >
               📸 Uslikaj
             </button>
@@ -365,16 +447,8 @@ const UploadPage = () => {
         </div>
       )}
 
-      {/* Tips */}
-      <div className="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="font-bold mb-3">💡 Savjeti za najbolje rezultate:</h3>
-        <ul className="space-y-2 text-sm text-gray-700">
-          <li>✓ Koristite dobro osvijetljenu fotografiju</li>
-          <li>✓ Gledajte direktno u kameru</li>
-          <li>✓ Uklonite naočare ili maske</li>
-          <li>✓ Izraz lica treba biti neutralan</li>
-        </ul>
-      </div>
+      {/* Face placement guide */}
+      <FacePlacementGuide />
     </div>
   );
 };

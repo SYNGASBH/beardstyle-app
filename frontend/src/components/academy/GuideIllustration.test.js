@@ -56,3 +56,35 @@ test('opening the large image pauses automatic step changes', () => {
   expect(screen.getByText('Korak 2/4')).toBeInTheDocument();
   view.unmount(); jest.useRealTimers();
 });
+
+describe('step animations and detailed how-to', () => {
+  const { DETAILS } = require('./GuideIllustration');
+  test.each(Object.keys(VISUALS))('%s: every step has sub-steps, a common mistake and a check', guideId => {
+    VISUALS[guideId].steps.forEach((_, i) => {
+      const d = DETAILS[guideId][i];
+      expect(d.how.length).toBeGreaterThanOrEqual(3);
+      expect(d.mistake).toBeTruthy();
+      expect(d.check).toBeTruthy();
+    });
+  });
+
+  test('animated tool follows the step line and can be switched off', () => {
+    const { container } = render(<GuideIllustration guideId="full-beard" stepIndex={0} />);
+    const anim = container.querySelector('.ag-step-animation');
+    expect(anim).toHaveAttribute('data-kind', 'neck');
+    expect(anim.querySelector('[data-tool="trimmer"]')).toBeTruthy();
+    expect(anim.querySelector('animateMotion').getAttribute('path')).toBe(createGuideGeometry('full-beard').zones.neck);
+    expect(screen.getByText('2 prsta')).toBeInTheDocument();
+    expect(screen.getByText('Česta greška:')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Animacija'));
+    expect(container.querySelector('.ag-step-animation')).toBeNull();
+  });
+
+  test('reduced motion shows the tool at rest instead of animating', () => {
+    window.matchMedia = jest.fn().mockReturnValue({ matches: true });
+    const { container } = render(<GuideIllustration guideId="goatee" stepIndex={1} />);
+    expect(container.querySelector('animateMotion')).toBeNull();
+    expect(container.querySelector('[data-tool="razor"]')).toBeTruthy();
+    delete window.matchMedia;
+  });
+});
