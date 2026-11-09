@@ -54,8 +54,26 @@ export function drawARBeard(ctx, face, slug, opacity = 0.8) {
     ctx.moveTo(-0.44, 0.15); ctx.quadraticCurveTo(-0.4, 0.8, 0, 1);
     ctx.quadraticCurveTo(0.4, 0.8, 0.44, 0.15); ctx.stroke();
   } else if (shape.chops) {
-    polygon([[-0.48,0],[-0.32,0.18],[-0.22,0.75],[-0.38,0.83],[-0.48,0.45]]);
-    polygon([[0.48,0],[0.32,0.18],[0.22,0.75],[0.38,0.83],[0.48,0.45]]);
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(side * 0.46, 0.02);
+      ctx.quadraticCurveTo(side * 0.41, 0.14, side * 0.35, 0.22);
+      ctx.bezierCurveTo(side * 0.30, 0.36, side * 0.28, 0.57, side * 0.25, 0.72);
+      ctx.quadraticCurveTo(side * 0.24, 0.78, side * 0.30, 0.77);
+      ctx.bezierCurveTo(side * 0.43, 0.74, side * 0.49, 0.43, side * 0.46, 0.02);
+      ctx.closePath();
+      ctx.fill();
+    }
+  } else if (slug === 'full-beard') {
+    ctx.beginPath();
+    ctx.moveTo(-0.46, 0.15);
+    ctx.bezierCurveTo(-0.38, 0.23, mouthX - 0.23, mouthY + 0.04, mouthX - 0.15, mouthY + 0.15);
+    ctx.quadraticCurveTo(mouthX, mouthY + 0.22, mouthX + 0.15, mouthY + 0.15);
+    ctx.bezierCurveTo(mouthX + 0.23, mouthY + 0.04, 0.38, 0.23, 0.46, 0.15);
+    ctx.bezierCurveTo(0.49, 0.61, 0.38, shape.length, 0, shape.length);
+    ctx.bezierCurveTo(-0.38, shape.length, -0.49, 0.61, -0.46, 0.15);
+    ctx.closePath();
+    ctx.fill();
   } else if (shape.chin) {
     const width = shape.wide ? 0.3 : 0.16;
     polygon([[-width,mouthY+0.14],[-width,0.93],[shape.pointed?0:-width/2,shape.length],
